@@ -1,10 +1,18 @@
 import express from "express";
-import { app } from "./app";
+// import { app } from "./app";
+import cors from "cors";
 
 const app = express();
 
-app.get("/", (req, res) => {
-  res.send("<h1>this is the test feels good</h1>");
+app.use(cors());
+app.use(express.json());
+
+app.post("/", (req, res) => {
+  res.json({ message: "Hello from server" });
+
+  const { name, email, password } = req.body;
+  req.json({ requestData: { name, email, password } });
+  console.log(name, email, password);
 });
 
 app.listen(4000, () => {
