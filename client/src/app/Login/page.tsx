@@ -4,7 +4,7 @@ import React from "react";
 const LoginPage = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-400">
-      <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+      <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full border-2 border-gray-300">
         <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
         <form>
           <div className="mb-4">

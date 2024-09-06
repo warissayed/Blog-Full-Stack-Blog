@@ -3,45 +3,46 @@ import Link from "next/link";
 import React, { useState } from "react";
 
 const RegisterPage: React.FC = () => {
-  const [name, setName] = useState("");
+  const [username, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    await fetch("http://localhost:4000", {
-      method: "POST",
-      body: JSON.stringify({ name, email, password }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Success:", data);
+    try {
+      await fetch("http://localhost:8000/api/v1/users/register", {
+        method: "POST",
+        body: JSON.stringify({ username, email, password }),
+        headers: {
+          "Content-Type": "application/json",
+        },
       })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Success:", data);
+        });
+    } catch (error) {
+      console.error("Error:", error);
+    }
   }
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-300">
-      <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full">
+    <div className="flex items-center justify-center min-h-screen bg-gray-400">
+      <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full border-2 border-gray-300">
         <h1 className="text-2xl font-bold mb-6 text-center">Register</h1>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label
               className="block text-gray-700 font-bold mb-2"
-              htmlFor="name"
+              htmlFor="username"
             >
-              Name
+              username
             </label>
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="name"
+              id="username"
               type="text"
               placeholder="Enter your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={username}
+              onChange={(e) => setUserName(e.target.value)}
             />
           </div>
           <div className="mb-4">

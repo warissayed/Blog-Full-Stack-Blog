@@ -1,11 +1,23 @@
-import express from "express";
-// import { app } from "./app";
-import cors from "cors";
+import { app } from "./app.js";
 
-const app = express();
+import connectDB from "./db/db.js";
+import dotenv from "dotenv";
 
-app.use(cors());
-app.use(express.json());
+dotenv.config({
+  path: "./.env",
+});
+
+connectDB()
+  .then(() => {
+    app.listen(process.env.PORT || 8000, () => {
+      console.log(`⚙️ Server is running on port ${process.env.PORT}`);
+    });
+    app.on("error", (error) => {
+      console.log("Error:", error);
+      throw error;
+    });
+  })
+  .catch((err) => console.log("mongodb connection failed ", err));
 
 app.post("/", (req, res) => {
   res.json({ message: "Hello from server" });
@@ -15,6 +27,6 @@ app.post("/", (req, res) => {
   console.log(name, email, password);
 });
 
-app.listen(4000, () => {
-  console.log("Server is running on port http://localhost:4000");
-});
+// app.listen(4000, () => {
+//   console.log("Server is running on port http://localhost:4000");
+// });
