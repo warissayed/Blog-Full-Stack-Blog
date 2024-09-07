@@ -1,29 +1,43 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/router";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  function login(event: React.FormEvent<HTMLFormElement>) {
+  const [errorMessage, setErrorMessage] = useState("");
+
+  async function login(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    fetch("http://localhost:8000/api/v1/users/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
+
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/users/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+        credentials: "include", // Include cookies in the request
       });
-    console.log("Login function called");
+
+      if (response.status === 200) {
+        // Redirect on successful login
+        useRouter().push("/Register");
+      } else {
+        const data = await response.json();
+        setErrorMessage(data.message || "Invalid credentials");
+      }
+    } catch (error) {
+      setErrorMessage("Something went wrong. Please try again.");
+    }
   }
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-400">
       <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full border-2 border-gray-300">
         <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
-        <form className="border-2 border-black rounded-lg" onSubmit={login}>
+        {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
+        <form onSubmit={login}>
           <div className="mb-4">
             <label
               className="block text-gray-700 font-bold mb-2"
@@ -38,6 +52,7 @@ const LoginPage = () => {
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               placeholder="Enter your email"
+              required
             />
           </div>
           <div className="mb-6">
@@ -54,6 +69,7 @@ const LoginPage = () => {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               placeholder="Enter your password"
+              required
             />
           </div>
           <div className="flex items-center justify-between">
