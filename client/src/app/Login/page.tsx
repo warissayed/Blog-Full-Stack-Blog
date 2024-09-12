@@ -1,11 +1,12 @@
 "use client";
 import React, { useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const router = useRouter();
 
   async function login(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -21,8 +22,9 @@ const LoginPage = () => {
       });
 
       if (response.status === 200) {
+        console.log("Login successful");
+        router.push("/");
         // Redirect on successful login
-        useRouter().push("/Register");
       } else {
         const data = await response.json();
         setErrorMessage(data.message || "Invalid credentials");
