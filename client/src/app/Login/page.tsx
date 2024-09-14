@@ -22,8 +22,10 @@ const LoginPage = () => {
       });
 
       if (response.status === 200) {
-        // Redirect on successful login
+        console.log("Login successful");
         router.push("/");
+        // Redirect on successful login
+        useRouter().push("/Register");
       } else {
         const data = await response.json();
         setErrorMessage(data.message || "Invalid credentials");

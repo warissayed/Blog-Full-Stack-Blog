@@ -1,6 +1,13 @@
 import React from "react";
 import Link from "next/link";
-import { FaTwitter, FaFacebook, FaInstagram, FaLinkedin } from "react-icons/fa";
+import {
+  FaTwitter,
+  FaFacebook,
+  FaInstagram,
+  FaLinkedin,
+  FaGithub,
+} from "react-icons/fa";
+import { FaX, FaXTwitter } from "react-icons/fa6";
 
 const Footer = () => {
   return (
@@ -55,14 +62,14 @@ const Footer = () => {
               <li className="mr-4">
                 <Link href="/login">
                   <i className="fab fa-twitter">
-                    <FaTwitter />
+                    <FaXTwitter />
                   </i>
                 </Link>
               </li>
               <li className="mr-4">
                 <Link href="/login">
                   <i className="fab fa-facebook">
-                    <FaFacebook />
+                    <FaGithub />
                   </i>
                 </Link>
               </li>
