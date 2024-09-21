@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import router from "./routes/user.routes.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -11,7 +12,9 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.json()); // To parse incoming JSON requests
+app.use(express.json());
+app.use(cookieParser());
+
 console.log("Hello from server");
 
 app.use("/api/v1/users", router);

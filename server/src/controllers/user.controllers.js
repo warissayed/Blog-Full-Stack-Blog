@@ -141,14 +141,44 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User logged Out"));
 });
 
-const profile = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.user._id).select(
-    "-password -refreshToken"
-  );
-  if (!user) {
-    throw new ApiError(404, "User not found");
+// const profile = asyncHandler(async (req, res) => {
+//   const user = await User.findById(decode._id).select(
+//     "-password -refreshToken"
+//   );
+//   if (!user) {
+//     throw new ApiError(404, "User not found");
+//   }
+//   return res.status(200).json(new ApiResponse(200, user, "User profile"));
+// });
+const isUserLoggedIn = asyncHandler(async (req, res) => {
+  const token =
+    req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
+
+  // Debugging logs to track token extraction
+  console.log("Token from cookies:", req.cookies?.accessToken);
+  console.log("Token from authorization header:", req.headers?.authorization);
+
+  if (!token) {
+    throw new ApiError(401, "Access token is required for authentication");
   }
-  return res.status(200).json(new ApiResponse(200, user, "User profile"));
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await User.findById(decoded.id).select(
+      "-password -refreshToken"
+    );
+
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, user, "User is logged in"));
+  } catch (error) {
+    throw new ApiError(401, "Invalid or expired access token");
+  }
 });
 
-export { registerUser, loginUser, logoutUser, profile };
+export { registerUser, loginUser, logoutUser, isUserLoggedIn };
