@@ -6,6 +6,7 @@ import { IoCloseSharp } from "react-icons/io5";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [user, setUser] = useState(null);
   useEffect(() => {
     fetch("http://localhost:8000/api/v1/users/profile", {
       method: "GET",
@@ -13,7 +14,11 @@ const Navbar = () => {
       headers: {
         "Content-Type": "application/json",
       },
-    });
+    })
+      .then((response) => response.json())
+      .then((userData) => {
+        console.log(userData);
+      });
   }, []);
 
   const toggleMenu = () => {

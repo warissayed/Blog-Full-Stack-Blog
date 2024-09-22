@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/User.models.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -161,13 +162,15 @@ const isUserLoggedIn = asyncHandler(async (req, res) => {
   if (!token) {
     throw new ApiError(401, "Access token is required for authentication");
   }
+  console.log("Token:", token);
+
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    const user = await User.findById(decoded.id).select(
+    const user = await User.findById(decoded._id).select(
       "-password -refreshToken"
     );
+    console.log("User:", user);
 
     if (!user) {
       throw new ApiError(404, "User not found");
@@ -175,9 +178,9 @@ const isUserLoggedIn = asyncHandler(async (req, res) => {
 
     return res
       .status(200)
-      .json(new ApiResponse(200, user, "User is logged in"));
+      .json(new ApiResponse(200, decoded, "User is logged in"));
   } catch (error) {
-    throw new ApiError(401, "Invalid or expired access token");
+    throw new ApiError(401, "Invalid access token");
   }
 });
 
