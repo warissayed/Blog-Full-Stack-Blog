@@ -3,10 +3,12 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FaBarsStaggered } from "react-icons/fa6";
 import { IoCloseSharp } from "react-icons/io5";
+import setUserStore from "../store/useStore";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [user, setUser] = useState(null);
+  // const [user, setUser] = useState(null);
+  const { user, setUser, logoutUser } = setUserStore();
   useEffect(() => {
     fetch("http://localhost:8000/api/v1/users/profile", {
       method: "GET",
@@ -34,7 +36,7 @@ const Navbar = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
-        setUser(null);
+        logoutUser();
       });
   }
   const toggleMenu = () => {
@@ -55,7 +57,7 @@ const Navbar = () => {
               {user ? (
                 <>
                   <Link
-                    href="/Login"
+                    href="/Test"
                     className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                   >
                     Add Blog
