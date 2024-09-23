@@ -118,28 +118,38 @@ const loginUser = asyncHandler(async (req, res) => {
       )
     );
 });
-//TODO its not working
 const logoutUser = asyncHandler(async (req, res) => {
-  User.findByIdAndUpdate(
-    req.user._id,
-    {
-      $set: {
-        refreshToken: undefined,
-      },
-    },
-    {
-      new: true,
+  try {
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+    });
+
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+    });
+
+    const { username } = req.body;
+
+    if (username) {
+      const user = await User.findById(username);
+
+      if (user) {
+        user.refreshToken = null;
+        await user.save({ validateBeforeSave: false });
+      }
     }
-  );
-  const options = {
-    httpOnly: true,
-    secure: true,
-  };
-  return res
-    .status(200)
-    .clearCookie("accessToken", options)
-    .clearCookie("refreshToken", options)
-    .json(new ApiResponse(200, {}, "User logged Out"));
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, null, "User logged out successfully"));
+  } catch (error) {
+    console.error("Error during user logout:", error);
+    throw new ApiError(500, "Server Error: Unable to log out user");
+  }
 });
 
 // const profile = asyncHandler(async (req, res) => {
@@ -155,14 +165,9 @@ const isUserLoggedIn = asyncHandler(async (req, res) => {
   const token =
     req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
 
-  // Debugging logs to track token extraction
-  console.log("Token from cookies:", req.cookies?.accessToken);
-  console.log("Token from authorization header:", req.headers?.authorization);
-
   if (!token) {
     throw new ApiError(401, "Access token is required for authentication");
   }
-  console.log("Token:", token);
 
   const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
@@ -170,7 +175,6 @@ const isUserLoggedIn = asyncHandler(async (req, res) => {
     const user = await User.findById(decoded._id).select(
       "-password -refreshToken"
     );
-    console.log("User:", user);
 
     if (!user) {
       throw new ApiError(404, "User not found");
