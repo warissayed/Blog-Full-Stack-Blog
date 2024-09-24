@@ -57,13 +57,13 @@ const Navbar = () => {
               {user ? (
                 <>
                   <Link
-                    href="/Test"
+                    href="/CreateBlog"
                     className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                   >
                     Add Blog
                   </Link>
                   <Link
-                    href="/Register"
+                    href="/Login"
                     className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
                   >
                     {user}

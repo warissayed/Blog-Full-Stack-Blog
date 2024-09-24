@@ -2,12 +2,14 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import setUserStore from "../store/useStore";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
+  const { setUser } = setUserStore();
 
   async function login(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -23,6 +25,9 @@ const LoginPage = () => {
       });
 
       if (response.status === 200) {
+        response.json().then((user) => {
+          setUser(user.data.user.username);
+        });
         router.push("/");
       } else {
         const data = await response.json();
