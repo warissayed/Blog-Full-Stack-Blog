@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import setUserStore from "../store/useStore";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { useRouter } from "next/navigation";
 
 const CreateBlog = () => {
   const [title, setTitle] = useState("");
@@ -10,6 +11,7 @@ const CreateBlog = () => {
   const [content, setContent] = useState("");
   const { user, setUser } = setUserStore();
   const [file, setFile] = useState<FileList | null>();
+  const router = useRouter();
   const modules = {
     toolbar: [
       [{ header: [1, 2, 3, 4, 5, 6, false] }],
@@ -34,7 +36,7 @@ const CreateBlog = () => {
   if (!user) {
     return setUser("  Please Login");
   }
-  function createNewPost(ev: React.FormEvent<HTMLFormElement>) {
+  async function createNewPost(ev: React.FormEvent<HTMLFormElement>) {
     ev.preventDefault();
     if (!file || file.length === 0) {
       console.error("No file selected");
@@ -46,17 +48,17 @@ const CreateBlog = () => {
     post.set("content", content);
     post.set("file", file[0]);
 
-    fetch("http://localhost:8000/api/v1/users/CreatePost", {
+    await fetch("http://localhost:8000/api/v1/users/CreatePost", {
       method: "POST",
+      credentials: "include",
       body: post,
     }).then((response) => {
-      if (response.ok) {
-        console.log("Post created successfully");
+      if (response.status === 200) {
+        router.push("/");
       } else {
-        console.error("Failed to create post");
+        console.log("error");
       }
     });
-    console.log(file);
   }
   return (
     <form className="flex flex-col gap-4" onSubmit={createNewPost}>

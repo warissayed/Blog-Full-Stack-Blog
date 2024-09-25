@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/User.models.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
+import BlogModel from "../models/Blog.models.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -151,16 +152,6 @@ const logoutUser = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Server Error: Unable to log out user");
   }
 });
-
-// const profile = asyncHandler(async (req, res) => {
-//   const user = await User.findById(decode._id).select(
-//     "-password -refreshToken"
-//   );
-//   if (!user) {
-//     throw new ApiError(404, "User not found");
-//   }
-//   return res.status(200).json(new ApiResponse(200, user, "User profile"));
-// });
 const isUserLoggedIn = asyncHandler(async (req, res) => {
   const token =
     req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
@@ -188,30 +179,45 @@ const isUserLoggedIn = asyncHandler(async (req, res) => {
   }
 });
 const createPost = asyncHandler(async (req, res) => {
-  const { title, content } = req.body;
-  const userId = req.user._id;
+  const { title, summary, content } = req.body;
+  const token =
+    req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
 
-  try {
-    const user = await User.findById(userId);
-
-    if (!user) {
-      throw new ApiError(404, "User not found");
-    }
-
-    const newPost = {
-      title,
-      content,
-      author: userId,
-    };
-
-    user.posts.push(newPost);
-    await user.save();
-
-    return res
-      .status(201)
-      .json(new ApiResponse(201, newPost, "Post created successfully"));
-  } catch (error) {
-    throw new ApiError(500, "Server Error: Unable to create post");
+  if (!token) {
+    throw new ApiError(401, "Access token is required for authentication");
   }
+
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+  const user = await User.findById(decoded._id).select(
+    "-password -refreshToken"
+  );
+  console.log(user);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+  console.log(user.username);
+  const post = await BlogModel.create({
+    title,
+    summary,
+    content,
+    user: user._id,
+    username: user.username,
+  });
+  res.json(post);
 });
-export { registerUser, loginUser, logoutUser, isUserLoggedIn, createPost };
+const getPost = asyncHandler(async (req, res) => {
+  const posts = await BlogModel.find();
+  posts.sort((a, b) => b.createdAt - a.createdAt);
+  posts.limit(20);
+  res.json(posts);
+});
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  isUserLoggedIn,
+  createPost,
+  getPost,
+};
