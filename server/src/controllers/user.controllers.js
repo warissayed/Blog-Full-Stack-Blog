@@ -187,5 +187,31 @@ const isUserLoggedIn = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Invalid access token");
   }
 });
+const createPost = asyncHandler(async (req, res) => {
+  const { title, content } = req.body;
+  const userId = req.user._id;
 
-export { registerUser, loginUser, logoutUser, isUserLoggedIn };
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
+
+    const newPost = {
+      title,
+      content,
+      author: userId,
+    };
+
+    user.posts.push(newPost);
+    await user.save();
+
+    return res
+      .status(201)
+      .json(new ApiResponse(201, newPost, "Post created successfully"));
+  } catch (error) {
+    throw new ApiError(500, "Server Error: Unable to create post");
+  }
+});
+export { registerUser, loginUser, logoutUser, isUserLoggedIn, createPost };

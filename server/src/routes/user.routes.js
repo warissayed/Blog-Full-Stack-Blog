@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  createPost,
   isUserLoggedIn,
   loginUser,
   logoutUser,
@@ -12,7 +13,7 @@ router.route("/register").post(registerUser);
 router.route("/login").post(loginUser);
 router.route("/logout").post(logoutUser);
 router.route("/profile").get(isUserLoggedIn);
-router.route("/CreatePost").post();
+router.route("/CreatePost").post(createPost);
 console.log("Hello from router");
 
 export default router;

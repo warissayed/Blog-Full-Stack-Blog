@@ -9,7 +9,7 @@ const CreateBlog = () => {
   const [summary, setSummary] = useState("");
   const [content, setContent] = useState("");
   const { user, setUser } = setUserStore();
-  const [file, setFile] = useState<FileList | null>(null);
+  const [file, setFile] = useState<FileList | null>();
   const modules = {
     toolbar: [
       [{ header: [1, 2, 3, 4, 5, 6, false] }],
@@ -36,11 +36,15 @@ const CreateBlog = () => {
   }
   function createNewPost(ev: React.FormEvent<HTMLFormElement>) {
     ev.preventDefault();
+    if (!file || file.length === 0) {
+      console.error("No file selected");
+      return;
+    }
     const post = new FormData();
     post.set("title", title);
     post.set("summary", summary);
     post.set("content", content);
-    // post.set("file", )
+    post.set("file", file[0]);
 
     fetch("http://localhost:8000/api/v1/users/CreatePost", {
       method: "POST",
@@ -52,6 +56,7 @@ const CreateBlog = () => {
         console.error("Failed to create post");
       }
     });
+    console.log(file);
   }
   return (
     <form className="flex flex-col gap-4" onSubmit={createNewPost}>
