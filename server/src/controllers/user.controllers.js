@@ -207,9 +207,10 @@ const createPost = asyncHandler(async (req, res) => {
   res.json(post);
 });
 const getPost = asyncHandler(async (req, res) => {
-  const posts = await BlogModel.find();
-  posts.sort((a, b) => b.createdAt - a.createdAt);
-  posts.limit(20);
+  // const posts = await BlogModel.find();
+  // posts.sort((a, b) => b.createdAt - a.createdAt);
+  const posts = await BlogModel.find().sort({ createdAt: -1 }).limit(20);
+
   res.json(posts);
 });
 
