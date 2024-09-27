@@ -2,7 +2,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { useRouter } from "next/navigation";
 
 interface Post {
   _id: string;
@@ -27,8 +26,6 @@ export default function Home() {
       });
     });
   }, []);
-  const router = useRouter();
-
   return (
     <>
       {post.length > 0 &&
@@ -37,16 +34,16 @@ export default function Home() {
             className="grid grid-cols-grid-template-columnsMain gap-2 p-2 mb-10  "
             key={post._id}
           >
-            <Link href={`/post/${post._id}`} className="w-full">
+            <div className="w-full">
               <img
                 src="https://images.unsplash.com/photo-1723737347273-5ae32dcdb5d3?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                 alt="Test Img"
                 className="max-w-full"
               />
-            </Link>
+            </div>
 
             <div>
-              <h1 className="text-4xl font-bold">{post.title}</h1>
+              <h2 className="text-4xl font-bold">{post.title}</h2>
               <div className="flex flex-col my-3">
                 <div className="flex items-center">
                   <img
