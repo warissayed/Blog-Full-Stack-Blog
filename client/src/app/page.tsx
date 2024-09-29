@@ -46,7 +46,9 @@ export default function Home() {
             </Link>
 
             <div>
-              <h1 className="text-4xl font-bold">{post.title}</h1>
+              <Link href={`/post/${post._id}`} className="text-4xl font-bold">
+                {post.title}
+              </Link>
               <div className="flex flex-col my-3">
                 <div className="flex items-center">
                   <img

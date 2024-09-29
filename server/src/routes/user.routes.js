@@ -1,7 +1,9 @@
 import { Router } from "express";
 import {
   createPost,
+  editPost,
   getPost,
+  getPostId,
   isUserLoggedIn,
   loginUser,
   logoutUser,
@@ -25,6 +27,8 @@ router.route("/CreatePost").post(
   createPost
 );
 router.route("/Post").get(getPost);
+router.route("/Post/:id").get(getPostId);
+router.route("/editPost").put(editPost);
 console.log("Hello from router");
 
 export default router;

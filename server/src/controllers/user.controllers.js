@@ -213,6 +213,47 @@ const getPost = asyncHandler(async (req, res) => {
 
   res.json(posts);
 });
+const getPostId = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const post = await BlogModel.findById(id);
+
+    if (!post) return res.status(404).send("Post not found");
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, post, "Post sendsuccessfully"));
+  } catch (error) {
+    console.error("Error during sending Post:", error);
+    throw new ApiError(500, "Server Error: Unable to log out Post");
+  }
+});
+const editPost = asyncHandler(async (req, res) => {
+  const { title, summary, content, userId } = req.body;
+  const token =
+    req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
+
+  if (!token) {
+    throw new ApiError(401, "Access token is required for authentication");
+  }
+
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+  const user = await User.findById(decoded._id).select(
+    "-password -refreshToken"
+  );
+  const isAuthor = userId === user._id.toString();
+  if (!isAuthor) {
+    throw new ApiError(403, "You are not authorized to edit this post");
+  }
+  const updatedPost = await BlogModel.findByIdAndUpdate(
+    req.params.id,
+    { title, summary, content },
+    { new: true }
+  );
+  res.json(updatedPost);
+});
+const deletePost = asyncHandler(async (req, res) => {});
 
 export {
   registerUser,
@@ -221,4 +262,7 @@ export {
   isUserLoggedIn,
   createPost,
   getPost,
+  getPostId,
+  editPost,
+  deletePost,
 };
