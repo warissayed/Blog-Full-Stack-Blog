@@ -16,6 +16,7 @@ const blogSchema = new mongoose.Schema(
     },
     image: {
       type: String,
+      required: true, // cloudinary url
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,

@@ -1,9 +1,13 @@
 "use client";
+import React from "react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FaBarsStaggered } from "react-icons/fa6";
 import { IoCloseSharp } from "react-icons/io5";
 import setUserStore from "../store/useStore";
+import { LoginBtn } from "./comps/LoginBtn";
+import { LogoutBtn } from "./comps/LogoutBtn";
+import { UserBtn } from "./comps/UserBtn";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,24 +60,15 @@ const Navbar = () => {
             <div className="ml-10 flex items-baseline space-x-4">
               {user ? (
                 <>
-                  <Link
-                    href="/CreateBlog"
-                    className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    Add Blog
+                  <Link href="/CreateBlog">
+                    <LoginBtn />
                   </Link>
-                  <Link
-                    href="/Login"
-                    className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    {user}
+
+                  <Link href="/Login">
+                    <UserBtn />
                   </Link>
-                  <Link
-                    href="/"
-                    onClick={logout}
-                    className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    Logout
+                  <Link href="/" onClick={logout}>
+                    <LogoutBtn />
                   </Link>
                 </>
               ) : (

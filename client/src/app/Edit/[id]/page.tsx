@@ -14,6 +14,7 @@ const modules = {
     ["clean"],
   ],
 };
+
 const formats = [
   "header",
   "bold",
@@ -40,13 +41,19 @@ const Page = () => {
   const updatePost = async (ev: React.FormEvent<HTMLFormElement>) => {
     ev.preventDefault();
 
+    if (!user) {
+      console.error("User is not authenticated.");
+      return;
+    }
+
     const post = new FormData();
     post.set("title", title);
     post.set("summary", summary);
     post.set("content", content);
 
+    // Check if file exists
     if (file && file.length > 0) {
-      post.append("file", file[0]); // Use append instead of set for file
+      post.append("file", file[0]); // Use append for file
     }
 
     try {
@@ -59,7 +66,7 @@ const Page = () => {
       );
 
       if (response.ok) {
-        router.push("/"); // Redirect to homepage or another page after update
+        router.push("/"); // Redirect after update
       } else {
         console.error("Failed to update the post");
       }
@@ -92,21 +99,30 @@ const Page = () => {
       fetchPost();
     }
   }, [id]);
-  async function updateBlog(ev) {
+
+  const updateBlog = async (ev: React.FormEvent<HTMLFormElement>) => {
     ev.preventDefault();
+
+    if (!user) {
+      console.error("User is not authenticated.");
+      return;
+    }
+
+    if (!file || file.length === 0) {
+      console.error("No file selected");
+      return;
+    }
+
     const blog = new FormData();
     blog.set("title", title);
     blog.set("summary", summary);
     blog.set("content", content);
-    blog.set("file", file[0]);
-    blog.set("userId", user.id);
-    //for files if we have files of 0 then we will add file to the data
-    await fetch(`http://localhost:8000/api/v1/users/Post${id}`, {
+    blog.append("file", file[0]); // Safely append file
+    blog.set("userId", user?.id || ""); // Use a fallback for user.id
+
+    await fetch(`http://localhost:8000/api/v1/users/Post/${id}`, {
       method: "PUT",
       credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: blog,
     })
       .then((res) => res.json())
@@ -114,7 +130,7 @@ const Page = () => {
         console.log(data);
         router.push(`/Post/${id}`);
       });
-  }
+  };
 
   return (
     <form className="flex flex-col gap-4" onSubmit={updateBlog}>

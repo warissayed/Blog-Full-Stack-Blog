@@ -4,6 +4,7 @@ import { User } from "../models/User.models.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import BlogModel from "../models/Blog.models.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -179,7 +180,7 @@ const isUserLoggedIn = asyncHandler(async (req, res) => {
   }
 });
 const createPost = asyncHandler(async (req, res) => {
-  const { title, summary, content } = req.body;
+  const { title, summary, content, file } = req.body;
   const token =
     req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
 
@@ -191,20 +192,33 @@ const createPost = asyncHandler(async (req, res) => {
   const user = await User.findById(decoded._id).select(
     "-password -refreshToken"
   );
-  console.log(user);
 
   if (!user) {
     throw new ApiError(404, "User not found");
   }
-  console.log(user.username);
+
+  const imageFile = req.files?.file?.[0];
+
+  if (!imageFile) {
+    throw new ApiError(400, "Image file is required this error");
+  }
+  const imageLocalPath = imageFile.path;
+
+  const image = await uploadOnCloudinary(imageLocalPath);
+  if (!image) {
+    throw new ApiError(400, "Error uploading image to Cloudinary");
+  }
   const post = await BlogModel.create({
     title,
     summary,
     content,
+    image: image.url,
     user: user._id,
     username: user.username,
   });
-  res.json(post);
+  return res
+    .status(201)
+    .json(new ApiResponse(200, post, "Post created successfully"));
 });
 const getPost = asyncHandler(async (req, res) => {
   // const posts = await BlogModel.find();
@@ -253,7 +267,7 @@ const editPost = asyncHandler(async (req, res) => {
   );
   res.json(updatedPost);
 });
-const deletePost = asyncHandler(async (req, res) => {});
+// const deletePost = asyncHandler(async (req, res) => {});
 
 export {
   registerUser,
