@@ -65,7 +65,7 @@ const CreateBlog = () => {
 
     if (err) {
       // Handle Error Here
-      alert("Something Snapped While Posting:/, Fuck Off");
+      alert("Something Snapped While Creating post");
       return;
     }
 

@@ -3,9 +3,9 @@ import { motion } from "framer-motion";
 export default function Header() {
   return (
     <div className="mt-16">
-      <div className="flex flex-col items-center font-lora text-gray-700 relative">
+      <div className="flex flex-col items-center font-lora  relative text-gray-700">
         <motion.span
-          className="absolute top-[18%] text-xl"
+          className="absolute top-[18%] text-xl font-bold"
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
@@ -14,8 +14,8 @@ export default function Header() {
         </motion.span>
 
         <motion.span
-          className="absolute top-[20%] text-[100px]"
-          initial={{ y: 50, opacity: 0 }}
+          className="absolute top-[20%] text-[100px] font-bold bg-gradient-to-r from-[#FFD700] to-yellow-500 bg-clip-text text-transparent"
+          initial={{ y: 50, opacity: 0 }} 
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.9 }}
         >

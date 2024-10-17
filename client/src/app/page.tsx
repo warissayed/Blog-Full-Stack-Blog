@@ -4,6 +4,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import Header from "./components/Header";
+import BlogPost from "./components/BlogPost";
+import TestComponent from "./components/TestComponent";
+import BlogList from "./components/TestComponent";
 
 interface Post {
   _id: string;
@@ -16,41 +19,47 @@ interface Post {
 }
 
 export default function Home() {
-  const [posts, setPosts] = useState<Post[]>([]); // Typed the state properly
+  // const [posts, setPosts] = useState<Post[]>([]); // Typed the state properly
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await fetch(
-          "http://localhost:8000/api/v1/users/Post",
-          {
-            method: "GET",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
+  // useEffect(() => {
+  //   const fetchPosts = async () => {
+  //     try {
+  //       const response = await fetch(
+  //         "http://localhost:8000/api/v1/users/Post",
+  //         {
+  //           method: "GET",
+  //           credentials: "include",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //           },
+  //         }
+  //       );
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch posts: ${response.statusText}`);
-        }
+  //       if (!response.ok) {
+  //         throw new Error(`Failed to fetch posts: ${response.statusText}`);
+  //       }
 
-        const data: Post[] = await response.json();
-        console.log(data);
-        setPosts(data);
-      } catch (error) {
-        console.error("Error fetching posts:", error);
-      }
-    };
+  //       const data: Post[] = await response.json();
+  //       console.log(data);
+  //       setPosts(data);
+  //     } catch (error) {
+  //       console.error("Error fetching posts:", error);
+  //     }
+  //   };
 
-    fetchPosts();
-  }, []);
+  //   fetchPosts();
+  // }, []);
 
   return (
     <>
       <Header />
-      {posts.length > 0 &&
+      <h1 className=" text-4xl font-bold text-center bg-black text-white ">
+        This is coming from the main page
+      </h1>
+      <BlogPost />
+      <TestComponent />
+      <BlogList />
+      {/* {posts.length > 0 &&
         posts.map((post) => (
           <div
             className="grid grid-cols-grid-template-columnsMain gap-2 p-2 mb-10"
@@ -85,7 +94,7 @@ export default function Home() {
               <p dangerouslySetInnerHTML={{ __html: post.content }}></p>
             </div>
           </div>
-        ))}
+        ))} */}
     </>
   );
 }

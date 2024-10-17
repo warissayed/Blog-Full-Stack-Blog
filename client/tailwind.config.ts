@@ -11,6 +11,14 @@ const config: Config = {
       gridTemplateColumns: {
         "grid-template-columnsMain": ".9fr 1.1fr",
       },
+      gridTemplateRows: {
+        "grid-template-rowsMain": "1fr .2fr .2fr",
+      },
+      backgroundImage: {
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+        "gradient-conic":
+          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
+      },
     },
   },
   plugins: [],

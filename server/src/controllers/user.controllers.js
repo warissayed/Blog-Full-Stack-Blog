@@ -24,17 +24,8 @@ const generateAccessAndRefreshToken = async (userId) => {
 };
 
 const registerUser = asyncHandler(async (req, res) => {
-  console.log("Hello from controller");
-
-  // Log the entire request body to check incoming data
-  console.log("Request Body:", req.body);
-
   const { username, email, password } = req.body;
 
-  // Log to confirm the values from req.body
-  console.log("Extracted Data:", username, email, password);
-
-  // If req.body is undefined or any field is missing
   if (!username || !email || !password) {
     throw new ApiError(400, "All fields are required");
   }
@@ -44,19 +35,29 @@ const registerUser = asyncHandler(async (req, res) => {
       $or: [{ username }, { email }],
     });
 
-    // Check if the user already exists
     if (existedUser) {
       throw new ApiError(409, "User with email or username already exists");
     }
 
+    const avatarLocalPath = req.file?.path;
+
+    if (!avatarLocalPath) {
+      throw new ApiError(400, "Avatar file is required");
+    }
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
+
+    if (!avatar) {
+      throw new ApiError(400, "Avatar file is required");
+    }
+
     // Create new user
     const user = await User.create({
-      username,
+      username: username.toLowerCase(),
       email,
       password,
+      avatar: avatar.url,
     });
 
-    // Find the newly created user without password field
     const createdUser = await User.findById(user._id).select("-password");
 
     if (!createdUser) {
@@ -75,7 +76,6 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Server Error: Unable to register user");
   }
 });
-
 const loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -278,5 +278,4 @@ export {
   getPost,
   getPostId,
   editPost,
-  deletePost,
 };

@@ -13,7 +13,7 @@ import { upload } from "../middleware/multer.middleware.js";
 
 const router = Router();
 
-router.route("/register").post(registerUser);
+router.route("/register").post(upload.single("avatar"), registerUser);
 router.route("/login").post(loginUser);
 router.route("/logout").post(logoutUser);
 router.route("/profile").get(isUserLoggedIn);
