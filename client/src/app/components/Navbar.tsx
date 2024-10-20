@@ -11,7 +11,7 @@ import { UserBtn } from "./comps/UserBtn";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  // const [user, setUser] = useState(null);
+
   const { user, setUser, logoutUser } = setUserStore();
   useEffect(() => {
     fetch("http://localhost:8000/api/v1/users/profile", {
@@ -25,7 +25,6 @@ const Navbar = () => {
       .then((userData) => {
         console.log(userData);
         setUser(userData.data.username);
-        console.log(userData.data.username);
       });
   }, []);
 

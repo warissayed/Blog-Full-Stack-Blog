@@ -36,10 +36,6 @@ const CreateBlog = () => {
   const [file, setFile] = useState<FileList | null>();
   const router = useRouter();
 
-  if (!user) {
-    return setUser("  Please Login");
-  }
-
   const fetchConfig = async (input: string, init?: RequestInit) => {
     const API = process.env.NEXT_PUBLIC_BACKEND_API;
 
@@ -64,12 +60,10 @@ const CreateBlog = () => {
     });
 
     if (err) {
-      // Handle Error Here
       alert("Something Snapped While Creating post");
       return;
     }
 
-    // Handle Toast & Post Ops
     router.push("/");
   };
 
@@ -89,15 +83,6 @@ const CreateBlog = () => {
   }
   return (
     <form className="flex flex-col gap-4" onSubmit={createNewPost}>
-      <h1 className="text-center">
-        Create Blog "
-        <text
-          className={user === "  Please Login" ? "text-red-500" : "text-black"}
-        >
-          {user}
-        </text>
-        "
-      </h1>
       <input
         title="title"
         type="text"

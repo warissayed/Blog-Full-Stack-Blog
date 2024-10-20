@@ -1,12 +1,14 @@
 "use client";
 import Link from "next/link";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const RegisterPage: React.FC = () => {
   const [username, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [avatar, setAvatar] = useState<FileList | null>();
+  const router = useRouter();
 
   const submitPost = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -19,13 +21,19 @@ const RegisterPage: React.FC = () => {
       if (avatar) {
         formData.append("avatar", avatar[0]);
       }
-      const response = await fetch(`${API}users/register`, {
+      const response = await fetch(`${API}/users/register`, {
         method: "POST",
         body: formData,
       });
-      const data = await response.json();
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Success:", data);
+        router.push("/Login");
+      } else {
+        console.error("Error:", response.statusText);
+      }
     } catch (error) {
-      console.error(error);
+      console.error("Error:", error);
     }
   };
 

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import setUserStore from "../store/useStore";
@@ -9,6 +9,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
+
   const { setUser } = setUserStore();
 
   async function login(event: React.FormEvent<HTMLFormElement>) {
@@ -21,12 +22,12 @@ const LoginPage = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ email, password }),
-        credentials: "include", // Include cookies in the request
+        credentials: "include",
       });
 
       if (response.status === 200) {
-        response.json().then((user) => {
-          setUser(user.data.user.username);
+        response.json().then((userData) => {
+          setUser(userData);
         });
         router.push("/");
       } else {

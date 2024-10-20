@@ -7,9 +7,10 @@ import { LoginBtn } from "./comps/LoginBtn";
 import { FaBars, FaTimes } from "react-icons/fa"; // For the hamburger menu icons
 import setUserStore from "../store/useStore";
 
-export default function Topbar() {
+export default function TopBar() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, setUser, logoutUser } = setUserStore();
+
   useEffect(() => {
     fetch("http://localhost:8000/api/v1/users/profile", {
       method: "GET",
@@ -21,8 +22,7 @@ export default function Topbar() {
       .then((response) => response.json())
       .then((userData) => {
         console.log(userData);
-        setUser(userData.data.username);
-        console.log(userData.data.username);
+        setUser(userData);
       });
   }, []);
 
@@ -92,12 +92,13 @@ export default function Topbar() {
         {/* Right Section (User or Login/Register) */}
         <div className="hidden md:flex items-center">
           {user ? (
-            <Link href="/settings">
+            <Link className="flex items-center space-x-2" href="/settings">
               <img
                 className="w-10 h-10 rounded-full object-cover cursor-pointer"
-                src="https://images.pexels.com/photos/1858175/pexels-photo-1858175.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500"
+                src={user.data.avatar}
                 alt="profile"
               />
+              <p>{user.data.username}</p>
             </Link>
           ) : (
             <ul className="flex space-x-6">

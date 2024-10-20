@@ -174,7 +174,7 @@ const isUserLoggedIn = asyncHandler(async (req, res) => {
 
     return res
       .status(200)
-      .json(new ApiResponse(200, decoded, "User is logged in"));
+      .json(new ApiResponse(200, user, "User is logged in"));
   } catch (error) {
     throw new ApiError(401, "Invalid access token");
   }

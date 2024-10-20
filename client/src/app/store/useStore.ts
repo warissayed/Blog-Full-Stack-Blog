@@ -1,8 +1,17 @@
 import { create } from "zustand";
 
+interface User {
+  data: {
+    _id: string;
+    avatar: string;
+    username: string;
+    email: string;
+  };
+}
+
 interface userState {
-  user: string | null;
-  setUser: (useData: string | null) => void;
+  user: User | null;
+  setUser: (user: User | null) => void;
   logoutUser: () => void;
 }
 
