@@ -8,6 +8,11 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        varela: ['"Varela Round"', "sans-serif"],
+        josefin: ['"Josefin Sans"', "sans-serif"],
+        lora: ['"Lora"', "serif"],
+      },
       gridTemplateColumns: {
         "grid-template-columnsMain": ".9fr 1.1fr",
       },

@@ -6,24 +6,52 @@ import { FcAddressBook } from "react-icons/fc";
 import { LoginBtn } from "./comps/LoginBtn";
 import { FaBars, FaTimes } from "react-icons/fa"; // For the hamburger menu icons
 import setUserStore from "../store/useStore";
+import { set } from "date-fns";
+interface User {
+  data: {
+    _id: string;
+    avatar: string;
+    username: string;
+    email: string;
+  };
+}
 
 export default function TopBar() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, setUser, logoutUser } = setUserStore();
+  const [userProfile, setUserProfile] = useState<User | null>();
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/v1/users/profile", {
-      method: "GET",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => response.json())
-      .then((userData) => {
-        console.log(userData);
-        setUser(userData);
-      });
+    const fetchUser = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:8000/api/v1/users/profile",
+          {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`Failed to fetch user: ${response.statusText}`);
+        }
+        const profileData = await response.json();
+        console.log(profileData);
+        setUser(profileData);
+        setUserProfile(profileData);
+
+        // .then((response) => response.json())
+        // .then((userData) => {
+        //   console.log(userData);
+        //   setUser(userData);
+        // });
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+    fetchUser();
   }, []);
 
   function logout() {
@@ -95,10 +123,10 @@ export default function TopBar() {
             <Link className="flex items-center space-x-2" href="/settings">
               <img
                 className="w-10 h-10 rounded-full object-cover cursor-pointer"
-                src={user.data.avatar}
+                src={userProfile?.data.avatar}
                 alt="profile"
               />
-              <p>{user.data.username}</p>
+              <p>{userProfile?.data.username}</p>
             </Link>
           ) : (
             <ul className="flex space-x-6">

@@ -28,8 +28,8 @@ const LoginPage = () => {
       if (response.status === 200) {
         response.json().then((userData) => {
           setUser(userData);
+          router.push("/");
         });
-        router.push("/");
       } else {
         const data = await response.json();
         setErrorMessage(data.message || "Invalid credentials");

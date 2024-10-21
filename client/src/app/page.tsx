@@ -53,11 +53,8 @@ export default function Home() {
   return (
     <>
       <Header />
-      <h1 className=" text-4xl font-bold text-center bg-black text-white ">
-        This is coming from the main page
-      </h1>
-      <BlogPost />
       <TestComponent />
+      <BlogPost />
       <BlogList />
       {/* {posts.length > 0 &&
         posts.map((post) => (
