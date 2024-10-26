@@ -114,7 +114,7 @@ const Page = () => {
       return;
     }
 
-    const blog = await new FormData();
+    const blog = new FormData();
     blog.set("title", title);
     blog.set("summary", summary);
     blog.set("content", content);

@@ -267,7 +267,27 @@ const editPost = asyncHandler(async (req, res) => {
   );
   res.json(updatedPost);
 });
-// const deletePost = asyncHandler(async (req, res) => {});
+
+const deletePost = asyncHandler(async (req, res) => {
+  const { userId } = req.body;
+  const token =
+    req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
+
+  if (!token) {
+    throw new ApiError(401, "Access token is required for authentication");
+  }
+
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+  const user = await User.findById(decoded._id).select(
+    "-password -refreshToken"
+  );
+  const isAuthor = userId === user._id.toString();
+  if (!isAuthor) {
+    throw new ApiError(403, "You are not authorized to delete this post");
+  }
+  const deletedPost = await BlogModel.findByIdAndDelete(req.params.id);
+  res.json(deletedPost);
+});
 
 export {
   registerUser,
@@ -278,4 +298,5 @@ export {
   getPost,
   getPostId,
   editPost,
+  deletePost,
 };

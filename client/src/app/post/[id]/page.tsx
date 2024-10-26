@@ -77,10 +77,10 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { format } from "date-fns";
 import setUserStore from "@/app/store/useStore";
+import { useRouter } from "next/navigation";
 //icons imports
 import { FaEdit } from "react-icons/fa";
 import { FaTrashAlt } from "react-icons/fa";
-import { div } from "framer-motion/client";
 
 interface BlogInfo {
   data: {
@@ -101,6 +101,7 @@ const page: React.FC = () => {
   const [blogInfo, setBlogInfo] = useState<BlogInfo>();
   const { user } = setUserStore();
   const { id } = useParams();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchBlogInfo = async () => {
@@ -128,14 +129,25 @@ const page: React.FC = () => {
   }, [id]);
 
   function delete_Post() {
-    fetch(`XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX${id}`, {
-      method: "DELETE",
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-      });
+    try {
+      fetch(`http://localhost:8000/api/v1/users/deletePost/${id}`, {
+        method: "DELETE",
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Failed to delete post.");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log(data);
+          router.push("/");
+        });
+    } catch (error) {
+      console.error("Failed to delete blog info:", error);
+    }
   }
+
   return (
     <div className="flex-9">
       {blogInfo ? (
