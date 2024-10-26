@@ -10,7 +10,10 @@ export default function TestComponent() {
     summary: string;
     content: string;
     image?: string;
-    username: string;
+    user: {
+      username: string;
+      avatar?: string;
+    };
   }
 
   const [posts, setPosts] = useState<Post[]>([]);
@@ -50,13 +53,13 @@ export default function TestComponent() {
         {posts.length > 0 &&
           posts.map((post) => (
             <div
-              className="w-[385px] m-[0px_25px_40px_25px] flex flex-col mt-4"
+              className="w-[385px] m-[0px_25px_40px_25px] flex flex-col mt-4 bg-white shadow-lg rounded-lg p-6  "
               key={post._id}
             >
               <Link href={`/post/${post._id}`} className="w-full">
                 {post.image && (
                   <img
-                    className="w-[385px] h-[280px] object-cover rounded-md"
+                    className="w-[385px] h-[280px]  object-cover rounded-md"
                     src={post.image}
                     alt=""
                   />
@@ -78,7 +81,9 @@ export default function TestComponent() {
                 </div>
                 <span className="font-josefin text-2xl font-bold mt-3 cursor-pointer">
                   <Link href={`/post/${post._id}`}>
-                    <p className="no-underline">{post.title}</p>
+                    <p className="no-underline w-[380px] text-center  truncate">
+                      {post.title}
+                    </p>
                   </Link>
                 </span>
                 <hr className="w-full mt-3" />
@@ -91,17 +96,17 @@ export default function TestComponent() {
                   </time>
                   <div className="flex items-center gap-1">
                     <img
-                      src="https://avatars.githubusercontent.com/u/119447310?s=400&u=58b6fd34401479669939e783be720049dc817d53&v=4"
+                      src={post.user.avatar}
                       alt="User avatar"
                       className="h-6 w-6 rounded-xl"
                     />
                     <span className="font-lora italic text-sm font-normal text-[#999999]">
-                      {post.username}
+                      {post.user.username}
                     </span>
                   </div>
                 </div>
               </div>
-              <p className="font-varela text-sm font-normal leading-[24px] text-[#444444] mt-3 overflow-hidden text-ellipsis line-clamp-4">
+              <p className="font-sans font-normal text-sm leading-6 text-gray-700 mt-4 overflow-hidden text-ellipsis line-clamp-4 truncate">
                 {post.summary}
               </p>
             </div>

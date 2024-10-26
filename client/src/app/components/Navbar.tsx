@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { FaBarsStaggered } from "react-icons/fa6";
 import { IoCloseSharp } from "react-icons/io5";
 import setUserStore from "../store/useStore";
-import { LoginBtn } from "./comps/LoginBtn";
+import { LoginBtn } from "./comps/LogoBtn";
 import { LogoutBtn } from "./comps/LogoutBtn";
 import { UserBtn } from "./comps/UserBtn";
 

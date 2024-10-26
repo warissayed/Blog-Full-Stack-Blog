@@ -214,16 +214,16 @@ const createPost = asyncHandler(async (req, res) => {
     content,
     image: image.url,
     user: user._id,
-    username: user.username,
   });
   return res
     .status(201)
     .json(new ApiResponse(200, post, "Post created successfully"));
 });
 const getPost = asyncHandler(async (req, res) => {
-  // const posts = await BlogModel.find();
-  // posts.sort((a, b) => b.createdAt - a.createdAt);
-  const posts = await BlogModel.find().sort({ createdAt: -1 }).limit(20);
+  const posts = await BlogModel.find()
+    .sort({ createdAt: -1 })
+    .limit(20)
+    .populate("user", "username avatar");
 
   res.json(posts);
 });
@@ -231,13 +231,13 @@ const getPostId = asyncHandler(async (req, res) => {
   try {
     const { id } = req.params;
 
-    const post = await BlogModel.findById(id);
+    const post = await BlogModel.findById(id).populate("user", "username");
 
     if (!post) return res.status(404).send("Post not found");
 
     return res
       .status(200)
-      .json(new ApiResponse(200, post, "Post sendsuccessfully"));
+      .json(new ApiResponse(200, post, "Post send successfully"));
   } catch (error) {
     console.error("Error during sending Post:", error);
     throw new ApiError(500, "Server Error: Unable to log out Post");

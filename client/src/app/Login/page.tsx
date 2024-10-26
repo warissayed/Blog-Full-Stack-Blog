@@ -26,8 +26,10 @@ const LoginPage = () => {
       });
 
       if (response.status === 200) {
-        response.json().then((userData) => {
-          setUser(userData);
+        await response.json().then((userData) => {
+          const ProfileData = userData.data;
+          console.log(ProfileData);
+          setUser(ProfileData);
           router.push("/");
         });
       } else {
@@ -38,7 +40,37 @@ const LoginPage = () => {
       setErrorMessage("Something went wrong. Please try again.");
     }
   }
+  // const fetchConfig = async (input: string, init?: RequestInit) => {
+  //   const API = process.env.NEXT_PUBLIC_BACKEND_API;
 
+  //   const request = await fetch(`${API}`.concat(input), init);
+  //   const requestData = await request.json();
+  //   let err;
+  //   let resp = requestData;
+
+  //   if (request.status >= 400) {
+  //     err = requestData;
+  //     resp = null;
+  //   }
+
+  //   return [err, resp];
+  // };
+
+  // const CreatePost = async (params: FormData) => {
+  //   const [err, resp] = await fetchConfig(`/users/CreatePost`, {
+  //     method: "POST",
+  //     credentials: "include",
+  //     body: params,
+  //   });
+
+  //   if (err) {
+  //     alert("Something Snapped While Creating post");
+  //     return;
+  //   }
+  //   if (resp) {
+  //     router.push("/");
+  //   }
+  // };
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-400">
       <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full border-2 border-gray-300">

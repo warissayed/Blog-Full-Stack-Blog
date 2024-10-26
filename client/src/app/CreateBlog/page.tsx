@@ -4,7 +4,7 @@ import setUserStore from "../store/useStore";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useRouter } from "next/navigation";
-import { error } from "console";
+import { FaPlus } from "react-icons/fa";
 
 const modules = {
   toolbar: [
@@ -63,8 +63,9 @@ const CreateBlog = () => {
       alert("Something Snapped While Creating post");
       return;
     }
-
-    router.push("/");
+    if (resp) {
+      router.push("/");
+    }
   };
 
   async function createNewPost(ev: React.FormEvent<HTMLFormElement>) {
@@ -82,33 +83,59 @@ const CreateBlog = () => {
     await CreatePost(post);
   }
   return (
-    <form className="flex flex-col gap-4" onSubmit={createNewPost}>
-      <input
-        title="title"
-        type="text"
-        placeholder="title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
+    <form
+      className="flex flex-col justify-center items-center gap-4 w-full h-screen mt-6"
+      onSubmit={createNewPost}
+    >
+      <img
+        className=" w-[70vw] h-[250px] rounded-lg object-cover"
+        src="https://images.pexels.com/photos/6685428/pexels-photo-6685428.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500"
+        alt=""
       />
-      <input
-        type="text"
-        placeholder="summary"
-        value={summary}
-        onChange={(e) => setSummary(e.target.value)}
-      />
-      <input
-        type="file"
-        accept=".png, .jpg, .jpeg"
-        placeholder="add File"
-        onChange={(ev) => setFile(ev.target.files)}
-      />
-      <ReactQuill
-        value={content}
-        onChange={(newValue) => setContent(newValue)}
-        modules={modules}
-        formats={formats}
-      />
-      <button type="submit">Submit</button>
+      <div className="flex flex-col items-center w-full mb-6 gap-3">
+        <input
+          className="text-2xl border-none p-3 w-[70vw] placeholder-gray-400 focus:outline-none"
+          title="title"
+          type="text"
+          placeholder="title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <input
+          className="w-[70vw]  text-lg p-2 border-none placeholder-gray-400 focus:outline-none"
+          type="text"
+          placeholder="summary"
+          value={summary}
+          onChange={(e) => setSummary(e.target.value)}
+        />
+
+        <label htmlFor="fileInput" className="cursor-pointer">
+          <i className="w-6 h-6 text-lg border border-gray-400 rounded-full flex items-center justify-center text-gray-500 ">
+            <FaPlus />
+          </i>
+        </label>
+        <input
+          id="fileInput"
+          type="file"
+          onChange={(ev) => setFile(ev.target.files)}
+          className="hidden"
+        />
+      </div>
+      <div className="w-[71%]">
+        <ReactQuill
+          value={content}
+          onChange={(newValue) => setContent(newValue)}
+          modules={modules}
+          formats={formats}
+        />
+      </div>
+
+      <button
+        className="mt-4 bg-teal-500 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded"
+        type="submit"
+      >
+        Submit
+      </button>
     </form>
   );
 };

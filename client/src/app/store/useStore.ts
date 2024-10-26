@@ -1,12 +1,11 @@
 import { create } from "zustand";
 
 interface User {
-  data: {
-    _id: string;
-    avatar: string;
-    username: string;
-    email: string;
-  };
+  _id: string;
+  avatar: string;
+  username: string;
+  email: string;
+  createdAt: string;
 }
 
 interface userState {

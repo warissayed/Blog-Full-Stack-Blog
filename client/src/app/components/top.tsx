@@ -2,24 +2,23 @@
 import Link from "next/link";
 import React, { useEffect } from "react";
 import { useState } from "react";
-import { FcAddressBook } from "react-icons/fc";
-import { LoginBtn } from "./comps/LoginBtn";
-import { FaBars, FaTimes } from "react-icons/fa"; // For the hamburger menu icons
+import { LoginBtn } from "./comps/LogoBtn";
 import setUserStore from "../store/useStore";
-import { set } from "date-fns";
+import { UserBtn } from "./comps/UserBtn";
+// For the hamburger menu icons
+import { FaBars, FaTimes } from "react-icons/fa";
+
 interface User {
-  data: {
-    _id: string;
-    avatar: string;
-    username: string;
-    email: string;
-  };
+  _id: string;
+  avatar: string;
+  username: string;
+  email: string;
 }
 
 export default function TopBar() {
   const [isOpen, setIsOpen] = useState(false);
   const { user, setUser, logoutUser } = setUserStore();
-  const [userProfile, setUserProfile] = useState<User | null>();
+  // const [userProfile, setUserProfile] = useState<User>();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -37,16 +36,9 @@ export default function TopBar() {
         if (!response.ok) {
           throw new Error(`Failed to fetch user: ${response.statusText}`);
         }
-        const profileData = await response.json();
-        console.log(profileData);
+        const Data = await response.json();
+        const profileData = Data.data;
         setUser(profileData);
-        setUserProfile(profileData);
-
-        // .then((response) => response.json())
-        // .then((userData) => {
-        //   console.log(userData);
-        //   setUser(userData);
-        // });
       } catch (error) {
         console.error("Error fetching user:", error);
       }
@@ -76,9 +68,9 @@ export default function TopBar() {
       <div className="container mx-auto px-4 flex justify-between items-center h-full">
         {/* Left Section (Social Icons) */}
         <div className="flex items-center">
-          <i className="mr-4 cursor-pointer">
+          <Link href={"/"} className="mr-4 cursor-pointer">
             <LoginBtn />
-          </i>
+          </Link>
         </div>
 
         {/* Center Section (Links) */}
@@ -120,13 +112,8 @@ export default function TopBar() {
         {/* Right Section (User or Login/Register) */}
         <div className="hidden md:flex items-center">
           {user ? (
-            <Link className="flex items-center space-x-2" href="/settings">
-              <img
-                className="w-10 h-10 rounded-full object-cover cursor-pointer"
-                src={userProfile?.data.avatar}
-                alt="profile"
-              />
-              <p>{userProfile?.data.username}</p>
+            <Link className="flex items-center space-x-2" href="/UserProfile">
+              <UserBtn />
             </Link>
           ) : (
             <ul className="flex space-x-6">
@@ -160,25 +147,26 @@ export default function TopBar() {
               <Link href="/">HOME</Link>
             </li>
             <li className="text-[18px] font-light cursor-pointer hover:text-gray-500">
-              ABOUT
+              <Link href="/">ABOUT</Link>
             </li>
             <li className="text-[18px] font-light cursor-pointer hover:text-gray-500">
-              CONTACT
+              <Link href="/"> CONTACT</Link>
             </li>
 
             {user && (
-              <ul className="flex flex-col items-center space-y-6 p-6">
+              <div className="flex flex-col items-center justify-center space-y-6 p-6">
                 <li className="text-[18px] font-light cursor-pointer hover:text-gray-500">
                   <Link href="/CreateBlog">WRITE</Link>
                 </li>
-                <Link
-                  href="/"
-                  className="text-[18px] font-light cursor-pointer hover:text-gray-500"
-                  onClick={logout}
-                >
-                  LOGOUT
-                </Link>
-              </ul>
+                <li className=" cursor-pointer hover:text-gray-500 ">
+                  <UserBtn />
+                </li>
+                <li className="text-[18px] font-light cursor-pointer hover:text-gray-500">
+                  <Link href="/" onClick={logout}>
+                    LOGOUT
+                  </Link>
+                </li>
+              </div>
             )}
             {!user && (
               <>
