@@ -132,6 +132,15 @@ const page: React.FC = () => {
     try {
       fetch(`http://localhost:8000/api/v1/users/deletePost/${id}`, {
         method: "DELETE",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+
+          Authorization: `Bearer ${user?._id}`,
+        },
+        body: JSON.stringify({
+          userId: user?._id,
+        }),
       })
         .then((response) => {
           if (!response.ok) {

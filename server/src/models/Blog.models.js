@@ -18,6 +18,10 @@ const blogSchema = new mongoose.Schema(
       type: String,
       required: true, // cloudinary url
     },
+    imagePublicId: {
+      type: String,
+      required: true, // cloudinary public id
+    },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
