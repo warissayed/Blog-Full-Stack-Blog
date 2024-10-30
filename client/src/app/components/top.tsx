@@ -7,6 +7,7 @@ import setUserStore from "../store/useStore";
 import { UserBtn } from "./comps/UserBtn";
 // For the hamburger menu icons
 import { FaBars, FaTimes } from "react-icons/fa";
+import Image from "next/image";
 
 interface User {
   _id: string;

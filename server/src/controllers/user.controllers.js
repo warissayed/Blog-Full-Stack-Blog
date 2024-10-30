@@ -181,7 +181,7 @@ const isUserLoggedIn = asyncHandler(async (req, res) => {
   }
 });
 const createPost = asyncHandler(async (req, res) => {
-  const { title, summary, content, file } = req.body;
+  const { title, summary, content } = req.body;
   const token =
     req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
 
@@ -190,6 +190,7 @@ const createPost = asyncHandler(async (req, res) => {
   }
 
   const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
   const user = await User.findById(decoded._id).select(
     "-password -refreshToken"
   );
@@ -206,7 +207,7 @@ const createPost = asyncHandler(async (req, res) => {
   const imageLocalPath = imageFile.path;
 
   const image = await uploadOnCloudinary(imageLocalPath);
-  console.log("Uploaded to cloudinary ", image);
+
   if (!image) {
     throw new ApiError(400, "Error uploading image to Cloudinary");
   }
@@ -218,7 +219,7 @@ const createPost = asyncHandler(async (req, res) => {
     imagePublicId: image.public_id,
     user: user._id,
   });
-  console.log(post);
+
   return res
     .status(201)
     .json(new ApiResponse(200, post, "Post created successfully"));
@@ -257,6 +258,7 @@ const editPost = asyncHandler(async (req, res) => {
   }
 
   const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
   const user = await User.findById(decoded._id).select(
     "-password -refreshToken"
   );
@@ -264,44 +266,16 @@ const editPost = asyncHandler(async (req, res) => {
   if (!isAuthor) {
     throw new ApiError(403, "You are not authorized to edit this post");
   }
-  const updatedPost = await BlogModel.findByIdAndUpdate(
-    req.params.id,
-    { title, summary, content },
-    { new: true }
-  );
-  res.json(updatedPost);
-});
 
-const deletePost = asyncHandler(async (req, res) => {
-  const { userId } = req.body;
-  console.log("This is user id from body", userId);
-  const token =
-    req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
-  console.log("This is the accessToken", token);
-  if (!token) {
-    throw new ApiError(401, "Access token is required for authentication");
-  }
-
-  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-  console.log("This is the decoded Value", decoded);
-  const user = await User.findById(decoded._id).select(
-    "-password -refreshToken"
-  );
-  console.log("This is the user", user);
-  const isAuthor = userId === user._id.toString();
-  if (!isAuthor) {
-    throw new ApiError(403, "You are not authorized to delete this post");
-  }
   const post = await BlogModel.findById(req.params.id);
   if (!post) {
     throw new ApiError(404, "Post not found");
   }
+
   const postImage_id = post.imagePublicId;
   if (!postImage_id) {
     console.error("Image public_id not found in post document");
   } else {
-    console.log("This is the postImage_id:", postImage_id);
-
     try {
       const cloudinaryResponse = await cloudinary.uploader.destroy(
         postImage_id
@@ -310,7 +284,76 @@ const deletePost = asyncHandler(async (req, res) => {
         console.error("Cloudinary deletion result:", cloudinaryResponse);
         throw new ApiError(500, "Error deleting image from Cloudinary");
       }
-      console.log("Image deleted from Cloudinary:", cloudinaryResponse);
+    } catch (err) {
+      console.error("Error deleting image from Cloudinary:", err);
+      throw new ApiError(500, "Error deleting image from Cloudinary");
+    }
+  }
+  const imageFile = req.files?.file?.[0];
+
+  if (!imageFile) {
+    throw new ApiError(400, "Image file is required this error");
+  }
+  const imageLocalPath = imageFile.path;
+
+  const image = await uploadOnCloudinary(imageLocalPath);
+
+  if (!image) {
+    throw new ApiError(400, "Error uploading image to Cloudinary");
+  }
+
+  const updatedPost = await BlogModel.findByIdAndUpdate(
+    req.params.id,
+    {
+      title,
+      summary,
+      content,
+      image: image.url,
+      imagePublicId: image.public_id,
+      user: user._id,
+    },
+    { new: true }
+  );
+  res.json(updatedPost);
+});
+
+const deletePost = asyncHandler(async (req, res) => {
+  const { userId } = req.body;
+
+  const token =
+    req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
+
+  if (!token) {
+    throw new ApiError(401, "Access token is required for authentication");
+  }
+
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+  const user = await User.findById(decoded._id).select(
+    "-password -refreshToken"
+  );
+
+  const isAuthor = userId === user._id.toString();
+  if (!isAuthor) {
+    throw new ApiError(403, "You are not authorized to delete this post");
+  }
+
+  const post = await BlogModel.findById(req.params.id);
+  if (!post) {
+    throw new ApiError(404, "Post not found");
+  }
+  const postImage_id = post.imagePublicId;
+  if (!postImage_id) {
+    console.error("Image public_id not found in post document");
+  } else {
+    try {
+      const cloudinaryResponse = await cloudinary.uploader.destroy(
+        postImage_id
+      );
+      if (cloudinaryResponse.result !== "ok") {
+        console.error("Cloudinary deletion result:", cloudinaryResponse);
+        throw new ApiError(500, "Error deleting image from Cloudinary");
+      }
     } catch (err) {
       console.error("Error deleting image from Cloudinary:", err);
       throw new ApiError(500, "Error deleting image from Cloudinary");

@@ -39,42 +39,44 @@ const Page = () => {
   const { id } = useParams();
   const router = useRouter();
 
-  // const updatePost = async (ev: React.FormEvent<HTMLFormElement>) => {
-  //   ev.preventDefault();
+  const fetchConfig = async (input: string, init?: RequestInit) => {
+    const API = process.env.NEXT_PUBLIC_BACKEND_API;
+    const res = await fetch(`${API}`.concat(input), init);
+    const requestData = await res.json();
+    return res.ok ? [requestData, null] : [null, requestData];
+  };
+  const EditPost = async (params: FormData) => {
+    const [response, error] = await fetchConfig(`/users/editPost/${id}`, {
+      method: "PUT",
+      credentials: "include",
+      body: params,
+    });
 
-  //   if (!user) {
-  //     console.error("User is not authenticated.");
-  //     return;
-  //   }
+    console.log("Response:", response);
+    console.log("Error:", error);
 
-  //   const post = new FormData();
-  //   post.set("title", title);
-  //   post.set("summary", summary);
-  //   post.set("content", content);
+    if (response) {
+      router.push(`/post/${id}`);
+    }
+    if (error) {
+      alert("Something Snapped While Updating post");
+      return;
+    }
+  };
+  const updatePost = async (ev: React.FormEvent<HTMLFormElement>) => {
+    ev.preventDefault();
 
-  //   // Check if file exists
-  //   if (file && file.length > 0) {
-  //     post.append("file", file[0]); // Use append for file
-  //   }
+    const post = new FormData();
+    post.set("title", title);
+    post.set("summary", summary);
+    post.set("content", content);
+    post.set("userId", user?._id || "");
+    if (file && file.length > 0) {
+      post.set("file", file[0]);
+    }
 
-  //   try {
-  //     const response = await fetch(
-  //       `http://localhost:8000/api/v1/users/Post/${id}`,
-  //       {
-  //         method: "PUT", // Assuming you're updating the post
-  //         body: post,
-  //       }
-  //     );
-
-  //     if (response.ok) {
-  //       router.push("/"); // Redirect after update
-  //     } else {
-  //       console.error("Failed to update the post");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //   }
-  // };
+    await EditPost(post);
+  };
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -101,42 +103,42 @@ const Page = () => {
     }
   }, [id]);
 
-  const updateBlog = async (ev: React.FormEvent<HTMLFormElement>) => {
-    ev.preventDefault();
+  // const updateBlog = async (ev: React.FormEvent<HTMLFormElement>) => {
+  //   ev.preventDefault();
 
-    if (!user) {
-      console.error("User is not authenticated.");
-      return;
-    }
+  //   if (!user) {
+  //     console.error("User is not authenticated.");
+  //     return;
+  //   }
 
-    if (!file || file.length === 0) {
-      console.error("No file selected");
-      return;
-    }
+  //   if (!file || file.length === 0) {
+  //     console.error("No file selected");
+  //     return;
+  //   }
 
-    const blog = new FormData();
-    blog.set("title", title);
-    blog.set("summary", summary);
-    blog.set("content", content);
-    blog.append("file", file[0]); // Safely append file
-    blog.set("userId", user?._id || ""); // Use a fallback for user.id
+  //   const blog = new FormData();
+  //   blog.set("title", title);
+  //   blog.set("summary", summary);
+  //   blog.set("content", content);
+  //   blog.append("file", file[0]); // Safely append file
+  //   blog.set("userId", user?._id || ""); // Use a fallback for user.id
 
-    await fetch(`http://localhost:8000/api/v1/users/Post/${id}`, {
-      method: "PUT",
-      credentials: "include",
-      body: blog,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        router.push(`/Post/${id}`);
-      });
-  };
+  //   await fetch(`http://localhost:8000/api/v1/users/Post/${id}`, {
+  //     method: "PUT",
+  //     credentials: "include",
+  //     body: blog,
+  //   })
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       console.log(data);
+  //       router.push(`/Post/${id}`);
+  //     });
+  // };
 
   return (
     <form
       className="flex flex-col justify-center items-center gap-4 w-full h-screen mt-6"
-      onSubmit={updateBlog}
+      onSubmit={updatePost}
     >
       <img
         className=" w-[70vw] h-[250px] rounded-lg object-cover"

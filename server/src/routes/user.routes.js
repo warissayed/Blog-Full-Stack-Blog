@@ -29,7 +29,15 @@ router.route("/CreatePost").post(
 );
 router.route("/Post").get(getPost);
 router.route("/Post/:id").get(getPostId);
-router.route("/editPost").put(editPost);
+router.route("/editPost/:id").put(
+  upload.fields([
+    {
+      name: "file",
+      maxCount: 1,
+    },
+  ]),
+  editPost
+);
 router.route("/deletePost/:id").delete(deletePost);
 console.log("Hello from router");
 
