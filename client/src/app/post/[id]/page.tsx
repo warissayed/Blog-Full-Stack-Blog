@@ -1,86 +1,18 @@
-// "use client";
-// import React, { useState } from "react";
-// import { useEffect } from "react";
-// import { useParams } from "next/navigation";
-// import setUserStore from "@/app/store/useStore";
-// import { userInfo } from "os";
-// import Link from "next/link";
-// interface BlogInfo {
-//   data: {
-//     _id: string;
-//     title: string;
-//     summary: string;
-//     content: string;
-//     image: string;
-//     username: string;
-//   };
-// }
-
-// function page() {
-//   const [blogInfo, setBlogInfo] = useState<BlogInfo>();
-//   const { user, setUser, logoutUser } = setUserStore();
-//   const { id } = useParams();
-
-//   useEffect(() => {
-//     const fetchBlogInfo = async () => {
-//       try {
-//         const response = await fetch(
-//           `http://localhost:8000/api/v1/users/Post/${id}`
-//         );
-
-//         // Check if the response is OK (status code 200-299)
-//         if (!response.ok) {
-//           throw new Error(`HTTP error! status: ${response.status}`);
-//         }
-
-//         const blogInfo = await response.json();
-//         console.log(blogInfo);
-//         setBlogInfo(blogInfo);
-//       } catch (error) {
-//         console.error("Failed to fetch blog info:", error);
-//       }
-//     };
-
-//     if (id) {
-//       fetchBlogInfo();
-//     }
-//   }, [id]);
-//   return (
-//     <div>
-//       {blogInfo ? (
-//         <div className="w-full h-full">
-//           <img src={blogInfo.data.image} alt="" />
-//           <h1>{blogInfo.data.title}</h1>
-//           {user?.username === blogInfo.data.username ? (
-//             <div>
-//               <Link href={`/Edit/${blogInfo.data._id}`}>Edit</Link>
-//               <button>Delete</button>
-//             </div>
-//           ) : (
-//             ""
-//           )}
-//           <p>{blogInfo.data.summary}</p>
-//           <p dangerouslySetInnerHTML={{ __html: blogInfo.data.content }}></p>
-//         </div>
-//       ) : (
-//         "Loading..."
-//       )}
-//     </div>
-//   );
-// }
-
-// export default page;
 "use client";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
-
+import React, { use, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { format } from "date-fns";
 import setUserStore from "@/app/store/useStore";
 import { useRouter } from "next/navigation";
+import { io, Socket } from "socket.io-client";
+
 //icons imports
 import { FaEdit } from "react-icons/fa";
 import { FaTrashAlt } from "react-icons/fa";
+import { FaHeart } from "react-icons/fa6";
+import { comment } from "postcss";
+import { data } from "framer-motion/client";
 
 interface BlogInfo {
   data: {
@@ -94,14 +26,39 @@ interface BlogInfo {
       _id: string;
       username: string;
     };
+    likes: String[];
+    comments: {
+      user: {
+        _id: string;
+        username: string;
+        avatar: string;
+      };
+      content: string;
+      timestamps: string;
+    }[];
   };
 }
 
 const page: React.FC = () => {
   const [blogInfo, setBlogInfo] = useState<BlogInfo>();
+  const [comment, setComment] = useState("");
+
+  const [socket, setSocket] = useState<Socket | null>(null);
   const { user } = setUserStore();
   const { id } = useParams();
   const router = useRouter();
+
+  useEffect(() => {
+    const newSocket = io("http://localhost:8000", {
+      reconnection: true,
+    });
+
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     const fetchBlogInfo = async () => {
@@ -110,12 +67,12 @@ const page: React.FC = () => {
           `http://localhost:8000/api/v1/users/Post/${id}`
         );
 
-        // Check if the response is OK (status code 200-299)
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const blogInfo = await response.json();
+        console.log(blogInfo);
 
         setBlogInfo(blogInfo);
       } catch (error) {
@@ -127,6 +84,184 @@ const page: React.FC = () => {
       fetchBlogInfo();
     }
   }, [id]);
+
+  //listen for Real-Time Updates
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("comments", (data: { postId: string; comment: any }) => {
+      if (data.postId === id) {
+        setBlogInfo((prev) =>
+          prev
+            ? {
+                ...prev,
+                data: {
+                  ...prev.data,
+                  comments: [...prev.data.comments, data.comment],
+                },
+              }
+            : prev
+        );
+      }
+    });
+
+    return () => {
+      socket.off("comments");
+    };
+  }, [socket, id]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on(
+      "likeUpdated",
+      (data: { postId: string; likes: string[]; action: string }) => {
+        console.log("Received likeUpdated event:", data); // Debug the payload
+
+        if (data.postId === id) {
+          setBlogInfo((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  data: {
+                    ...prev.data,
+                    likes: data.likes, // Update with the new likes array
+                  },
+                }
+              : prev
+          );
+        }
+      }
+    );
+
+    return () => {
+      socket.off("likeUpdated");
+    };
+  }, [socket, id]);
+
+  console.log("Updated Likes Array:", blogInfo?.data?.likes);
+
+  useEffect(() => {
+    console.log("Updated blogInfo:", blogInfo?.data?.likes);
+  }, [blogInfo]);
+
+  //Like and unlike Functionality test 1
+  // const toggleLike = async () => {
+  //   try {
+  //     const response = await fetch(
+  //       `http://localhost:8000/api/v1/users/blogs/${id}/like`,
+  //       {
+  //         method: "POST",
+  //         credentials: "include",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${user?._id}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (response.ok) {
+  //       const updatedBlog = await response.json();
+  //       setBlogInfo(
+  //         (prev) =>
+  //           prev && {
+  //             ...prev,
+  //             data: { ...prev.data, likes: updatedBlog.likes },
+  //           }
+  //       );
+  //       console.log("Like updated successfully");
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to toggle like:", error);
+  //   }
+  // };
+
+  // const toggleLike = async () => {
+  //   try {
+  //     const response = await fetch(
+  //       `http://localhost:8000/api/v1/users/blogs/${id}/like`,
+  //       {
+  //         method: "POST",
+  //         credentials: "include",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${user?._id}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (!response.ok) throw new Error("Failed to update like");
+
+  //     // Update the local state optimistically
+  //     const updatedBlog = await response.json();
+  //     setBlogInfo(
+  //       (prev) =>
+  //         prev && {
+  //           ...prev,
+  //           data: { ...prev.data, likes: updatedBlog.likes },
+  //         }
+  //     );
+  //   } catch (error) {
+  //     console.error("Error updating like:", error);
+  //   }
+  // };
+
+  const toggleLike = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/v1/users/blogs/${id}/like`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            Authorization: `Bearer ${user?._id}`,
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to update like");
+
+      const updatedLikes = await response.json(); // Ensure this returns an array
+      setBlogInfo((prev) =>
+        prev
+          ? {
+              ...prev,
+              data: {
+                ...prev.data,
+                likes: updatedLikes.likes,
+              },
+            }
+          : prev
+      );
+    } catch (error) {
+      console.error("Error updating like:", error);
+    }
+  };
+
+  const submitComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!comment) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/v1/users/blogs/${id}/comment`,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user?._id}`, // Ensure correct token usage
+          },
+          body: JSON.stringify({ content: comment }),
+        }
+      );
+      if (response.ok) {
+        setComment(""); // Clear the input after submission
+      }
+    } catch (error) {
+      console.error("Failed to submit comment:", error);
+    }
+  };
 
   function delete_Post() {
     try {
@@ -206,6 +341,18 @@ const page: React.FC = () => {
                 </Link>
               </b>
             </span>
+            <div className="flex items-center gap-2">
+              <button onClick={toggleLike} className="flex items-center">
+                <FaHeart
+                  className={
+                    user?._id && blogInfo?.data?.likes?.includes(user._id)
+                      ? "text-red-500"
+                      : "text-gray-400"
+                  }
+                />
+              </button>
+              <span>{blogInfo?.data?.likes?.length || 0} Likes</span>
+            </div>
             {user?.createdAt && (
               <time
                 className="font-lora italic text-sm font-normal text-[#999999] mt-3 mr-3"
@@ -220,6 +367,51 @@ const page: React.FC = () => {
             className="text-gray-600 text-lg leading-6"
             dangerouslySetInnerHTML={{ __html: blogInfo.data.content }}
           ></p>
+          <div>
+            <h3>Comments</h3>
+            <ul>
+              {blogInfo.data.comments.map((comment, index) => (
+                <li key={index} className="my-2">
+                  <div className="flex">
+                    <img
+                      className="w-8 h-8 rounded-full"
+                      src={comment.user?.avatar}
+                      alt="User Image"
+                    />
+                    <strong>{comment.user.username}</strong>:
+                  </div>
+
+                  <p>{comment.content}</p>
+                  {comment.timestamps && (
+                    <time
+                      className="font-lora italic text-sm font-normal text-[#999999] mt-3 mr-3"
+                      dateTime={comment.timestamps}
+                    >
+                      {format(
+                        new Date(comment.timestamps),
+                        "MMM d, yyyy HH:mm"
+                      )}
+                    </time>
+                  )}
+                </li>
+              ))}
+            </ul>
+            {/* Comment Form */}
+            <form onSubmit={submitComment} className="mt-4">
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Add a comment..."
+                className="w-full p-2 border rounded"
+              ></textarea>
+              <button
+                type="submit"
+                className="bg-blue-500 text-white p-2 mt-2 rounded"
+              >
+                Post Comment
+              </button>
+            </form>
+          </div>
         </div>
       ) : (
         <div className="text-center">
@@ -227,7 +419,6 @@ const page: React.FC = () => {
           <p className="text-yellow-500">Please wait</p>
         </div>
       )}
-      );
     </div>
   );
 };

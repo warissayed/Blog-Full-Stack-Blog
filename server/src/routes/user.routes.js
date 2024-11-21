@@ -1,11 +1,13 @@
 import { Router } from "express";
 import {
+  blogComment,
   createPost,
   deletePost,
   editPost,
   getPost,
   getPostId,
   isUserLoggedIn,
+  likePost,
   loginUser,
   logoutUser,
   registerUser,
@@ -39,6 +41,8 @@ router.route("/editPost/:id").put(
   editPost
 );
 router.route("/deletePost/:id").delete(deletePost);
+router.route("/blogs/:id/like").post(likePost);
+router.route("/blogs/:id/comment").post(blogComment);
 console.log("Hello from router");
 
 export default router;

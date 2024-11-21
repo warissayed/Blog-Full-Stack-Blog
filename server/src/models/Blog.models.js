@@ -26,16 +26,28 @@ const blogSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    // avatar: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "User",
-    // },
-    // username: {
-    //   type: String,
-    //   required: true,
-    // },
+    likes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    comments: [
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        content: {
+          type: String,
+          required: true,
+        },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );
+
 const BlogModel = mongoose.model("Blog", blogSchema);
 export default BlogModel;

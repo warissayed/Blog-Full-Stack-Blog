@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import BlogModel from "../models/Blog.models.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import * as cloudinary from "cloudinary";
+import { io } from "../app.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -236,7 +237,9 @@ const getPostId = asyncHandler(async (req, res) => {
   try {
     const { id } = req.params;
 
-    const post = await BlogModel.findById(id).populate("user", "username");
+    const post = await BlogModel.findById(id)
+      .populate("user", "username avatar")
+      .populate("comments.user", "username avatar");
 
     if (!post) return res.status(404).send("Post not found");
 
@@ -363,6 +366,237 @@ const deletePost = asyncHandler(async (req, res) => {
   res.json(deletedPost);
 });
 
+// const likePost = asyncHandler(async (req, res) => {
+//   const { id } = req.params;
+
+//   const token =
+//     req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
+//   if (!token) {
+//     throw new ApiError(401, "Access token is required for authentication");
+//   }
+
+//   const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+//   const user = await User.findById(decoded._id).select(
+//     "-password -refreshToken"
+//   );
+
+//   if (!user) {
+//     throw new ApiError(404, "User Not Found");
+//   }
+//   const post = await BlogModel.findById(id);
+
+//   if (!post) {
+//     throw new ApiError(404, "Post not found");
+//   }
+
+//   const userId = user._id.toString();
+
+//   const isLiked = post.likes.includes(userId);
+//   if (isLiked) {
+//     //unlike:remove user from like array
+//     post.likes = post.likes.filter((like) => like !== userId);
+//   } else {
+//     post.likes.push(userId);
+//   }
+
+//   const updatedPost = await BlogModel.findByIdAndUpdate(id, post, {
+//     new: true,
+//   });
+
+//   //Emit the updated likes
+//   req.io.emit("likeUpdated", {
+//     postId: id,
+//     likes: updatedPost.likes,
+//   });
+
+//   res.json({
+//     updatedPost,
+//   });
+// });
+// const likePost = asyncHandler(async (req, res) => {
+//   const { id } = req.params;
+
+//   const token =
+//     req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
+//   if (!token) {
+//     throw new ApiError(401, "Access token is required for authentication");
+//   }
+
+//   const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+//   const user = await User.findById(decoded._id).select(
+//     "-password -refreshToken"
+//   );
+//   if (!user) {
+//     throw new ApiError(404, "User not found");
+//   }
+
+//   const post = await BlogModel.findById(id);
+//   if (!post) {
+//     throw new ApiError(404, "Post not found");
+//   }
+
+//   const userId = user._id.toString(); // Convert ObjectId to string
+//   const isLiked = post.likes.includes(userId);
+//   console.log("UserId:", userId);
+//   console.log("Post Likes:", post.likes);
+//   console.log("Is Liked:", isLiked);
+
+//   let action = "";
+
+//   if (isLiked) {
+//     // Remove like
+//     post.likes = post.likes.filter((like) => like !== userId);
+//     action = "dislike";
+//   } else {
+//     // Add like
+//     post.likes.push(userId);
+//     action = "like";
+//   }
+
+//   const updatedPost = await BlogModel.findByIdAndUpdate(id, post, {
+//     new: true,
+//   });
+
+//   // Emit the updated likes with action
+//   req.io.emit("likeUpdated", {
+//     postId: id,
+//     likes: updatedPost,
+//     action,
+//   });
+//   console.log(updatedPost, id, updatedPost.likes, action);
+//   res.json(updatedPost);
+// });
+const likePost = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const token =
+    req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    throw new ApiError(401, "Access token is required for authentication");
+  }
+
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+  const user = await User.findById(decoded._id).select(
+    "-password -refreshToken"
+  );
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const post = await BlogModel.findById(id);
+  if (!post) {
+    throw new ApiError(404, "Post not found");
+  }
+
+  const userId = user._id.toString(); // Convert the user ID to a string
+  const isLiked = post.likes.some((like) => like.toString() === userId); // Check if user ID exists in likes array
+
+  let action = "";
+
+  if (isLiked) {
+    // Remove like
+    post.likes = post.likes.filter((like) => like.toString() !== userId); // Ensure comparison handles ObjectId
+    action = "dislike";
+  } else {
+    // Add like
+    post.likes.push(user._id); // Push the ObjectId directly
+    action = "like";
+  }
+
+  const updatedPost = await post.save(); // Save the updated post
+
+  // Emit the updated likes array and action to connected clients
+  req.io.emit("likeUpdated", {
+    postId: id,
+    likes: updatedPost.likes.map((like) => like.toString()), // Convert ObjectId to string for the frontend
+    action, // 'like' or 'dislike'
+  });
+
+  console.log("Emitting likeUpdated Event:", {
+    postId: id,
+    likes: updatedPost.likes,
+    action,
+  });
+
+  res.json({ likes: updatedPost.likes.map((like) => like.toString()) }); // Ensure frontend receives string IDs
+});
+
+// const blogComment = asyncHandler(async (req, res) => {
+//   const { id } = req.params;
+//   const { content } = req.body;
+//   const post = await BlogModel.findById(id);
+//   const token =
+//     req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
+//   if (!token) {
+//     throw new ApiError(401, "Access token is required for authentication");
+//   }
+//   const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+//   const user = await User.findById(decoded._id).select(
+//     "-password -refreshToken"
+//   );
+//   const userId = user._id.toString();
+//   post.comments.push({ content, user: userId, date: new Date() });
+//   const updatedPost = await BlogModel.findByIdAndUpdate(id, post, {
+//     new: true,
+//   });
+
+//   io.emit("comments", {
+//     postId: id,
+//     comments: updatedPost,
+//   });
+
+//   res.json(updatedPost);
+// });
+const blogComment = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { content } = req.body;
+
+  const token =
+    req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
+  if (!token) {
+    throw new ApiError(401, "Access token is required for authentication");
+  }
+
+  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+  const user = await User.findById(decoded._id).select(
+    "-password -refreshToken"
+  );
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const post = await BlogModel.findById(id);
+  if (!post) {
+    throw new ApiError(404, "Post not found");
+  }
+
+  const newComment = {
+    content,
+    user: {
+      _id: user._id,
+      username: user.username,
+      avatar: user.avatar,
+    },
+    date: new Date(),
+  };
+
+  post.comments.push(newComment);
+
+  const updatedPost = await BlogModel.findByIdAndUpdate(id, post, {
+    new: true,
+  });
+
+  // Emit the new comment event
+  req.io.emit("comments", {
+    postId: id,
+    comment: newComment, // Emit only the new comment
+  });
+
+  res.json(updatedPost);
+});
+
+//created like post and blog comments
+
 export {
   registerUser,
   loginUser,
@@ -373,4 +607,6 @@ export {
   getPost,
   getPostId,
   editPost,
+  likePost,
+  blogComment,
 };
