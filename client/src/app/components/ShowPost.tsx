@@ -20,17 +20,15 @@ export default function TestComponent() {
 
   useEffect(() => {
     const fetchPosts = async () => {
+      const API = process.env.NEXT_PUBLIC_BACKEND_API;
       try {
-        const response = await fetch(
-          "http://localhost:8000/api/v1/users/Post",
-          {
-            method: "GET",
-            credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        const response = await fetch(`${API}/users/Post`, {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
         if (!response.ok) {
           throw new Error(`Failed to fetch posts: ${response.statusText}`);

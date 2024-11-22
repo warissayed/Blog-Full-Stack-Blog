@@ -5,6 +5,9 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useRouter } from "next/navigation";
 import { FaPlus } from "react-icons/fa";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Image from "next/image";
 
 const modules = {
   toolbar: [
@@ -60,10 +63,11 @@ const CreateBlog = () => {
     });
 
     if (err) {
-      alert("Something Snapped While Creating post");
+      toast.warning("Something Snapped While Creating post");
       return;
     }
     if (resp) {
+      toast.success("Post uploaded successfully");
       router.push("/");
     }
   };
@@ -72,9 +76,11 @@ const CreateBlog = () => {
     ev.preventDefault();
     if (!file || file.length === 0) {
       console.error("No file selected");
+      toast.error("No file selected");
       return;
     }
     const post = new FormData();
+
     post.set("title", title);
     post.set("summary", summary);
     post.set("content", content);
@@ -82,16 +88,26 @@ const CreateBlog = () => {
 
     await CreatePost(post);
   }
+  const handleFileChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = ev.target.files;
+    setFile(selectedFiles);
+    if (selectedFiles && selectedFiles.length > 0) {
+      toast.success("File uploaded successfully!");
+    }
+  };
   return (
     <form
       className="flex flex-col justify-center items-center gap-4 w-full h-screen mt-6"
       onSubmit={createNewPost}
     >
-      <img
-        className=" w-[70vw] h-[250px] rounded-lg object-cover"
+      <Image
+        className="w-[70vw] h-[250px] rounded-lg object-cover"
         src="https://images.pexels.com/photos/6685428/pexels-photo-6685428.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500"
         alt=""
+        width={700}
+        height={250}
       />
+
       <div className="flex flex-col items-center w-full mb-6 gap-3">
         <input
           className="text-2xl border-none p-3 w-[70vw] placeholder-gray-400 focus:outline-none"
@@ -117,7 +133,7 @@ const CreateBlog = () => {
         <input
           id="fileInput"
           type="file"
-          onChange={(ev) => setFile(ev.target.files)}
+          onChange={handleFileChange}
           className="hidden"
         />
       </div>

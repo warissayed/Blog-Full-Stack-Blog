@@ -3,20 +3,23 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import setUserStore from "../store/useStore";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // State for toggling
   const router = useRouter();
 
   const { setUser } = setUserStore();
 
   async function login(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
+    const API = process.env.NEXT_PUBLIC_BACKEND_API;
     try {
-      const response = await fetch("http://localhost:8000/api/v1/users/login", {
+      const response = await fetch(`${API}/users/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -30,47 +33,20 @@ const LoginPage = () => {
           const ProfileData = userData.data;
           console.log(ProfileData);
           setUser(ProfileData);
+          toast.success("Login successful!");
           router.push("/");
         });
       } else {
-        const data = await response.json();
-        setErrorMessage(data.message || "Invalid credentials");
+        const errorData = await response.json();
+        toast.warning(`Error: ${errorData.message || "Something went wrong"}`);
+        setErrorMessage(errorData.message || "Invalid credentials");
       }
     } catch (error) {
+      toast.error("An unexpected error occurred. Please try again.");
       setErrorMessage("Something went wrong. Please try again.");
     }
   }
-  // const fetchConfig = async (input: string, init?: RequestInit) => {
-  //   const API = process.env.NEXT_PUBLIC_BACKEND_API;
 
-  //   const request = await fetch(`${API}`.concat(input), init);
-  //   const requestData = await request.json();
-  //   let err;
-  //   let resp = requestData;
-
-  //   if (request.status >= 400) {
-  //     err = requestData;
-  //     resp = null;
-  //   }
-
-  //   return [err, resp];
-  // };
-
-  // const CreatePost = async (params: FormData) => {
-  //   const [err, resp] = await fetchConfig(`/users/CreatePost`, {
-  //     method: "POST",
-  //     credentials: "include",
-  //     body: params,
-  //   });
-
-  //   if (err) {
-  //     alert("Something Snapped While Creating post");
-  //     return;
-  //   }
-  //   if (resp) {
-  //     router.push("/");
-  //   }
-  // };
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-400">
       <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full border-2 border-gray-300">
@@ -94,7 +70,7 @@ const LoginPage = () => {
               required
             />
           </div>
-          <div className="mb-6">
+          <div className="mb-6 relative">
             <label
               className="block text-gray-700 font-bold mb-2"
               htmlFor="password"
@@ -104,12 +80,21 @@ const LoginPage = () => {
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
               id="password"
-              type="password"
+              type={showPassword ? "text" : "password"} // Toggle between text and password
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               placeholder="Enter your password"
               required
             />
+            <button
+              type="button"
+              className="absolute right-2 top-8 text-gray-500 focus:outline-none"
+              onMouseDown={() => setShowPassword(true)} // Show password on hold
+              onMouseUp={() => setShowPassword(false)} // Hide password on release
+              onMouseLeave={() => setShowPassword(false)} // Handle case where mouse leaves button
+            >
+              {showPassword ? "🙈" : "👁️"} {/* Change icon based on state */}
+            </button>
           </div>
           <div className="flex items-center justify-between">
             <button

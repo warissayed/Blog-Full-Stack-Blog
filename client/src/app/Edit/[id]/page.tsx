@@ -5,6 +5,9 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useParams, useRouter } from "next/navigation";
 import { FaPlus } from "react-icons/fa";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Image from "next/image";
 
 const modules = {
   toolbar: [
@@ -39,8 +42,9 @@ const Page = () => {
   const { id } = useParams();
   const router = useRouter();
 
+  const API = process.env.NEXT_PUBLIC_BACKEND_API;
+
   const fetchConfig = async (input: string, init?: RequestInit) => {
-    const API = process.env.NEXT_PUBLIC_BACKEND_API;
     const res = await fetch(`${API}`.concat(input), init);
     const requestData = await res.json();
     return res.ok ? [requestData, null] : [null, requestData];
@@ -52,14 +56,12 @@ const Page = () => {
       body: params,
     });
 
-    console.log("Response:", response);
-    console.log("Error:", error);
-
     if (response) {
+      toast.success("Post updated Successfully");
       router.push(`/post/${id}`);
     }
     if (error) {
-      alert("Something Snapped While Updating post");
+      toast.error("Something Snapped While Updating post");
       return;
     }
   };
@@ -67,6 +69,9 @@ const Page = () => {
     ev.preventDefault();
 
     const post = new FormData();
+    if (!file) {
+      toast.error("Please upload a file");
+    }
     post.set("title", title);
     post.set("summary", summary);
     post.set("content", content);
@@ -81,9 +86,7 @@ const Page = () => {
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:8000/api/v1/users/Post/${id}`
-        );
+        const response = await fetch(`${API}/users/Post/${id}`);
 
         if (!response.ok) {
           throw new Error(`Failed to fetch post. Status: ${response.status}`);
@@ -103,47 +106,25 @@ const Page = () => {
     }
   }, [id]);
 
-  // const updateBlog = async (ev: React.FormEvent<HTMLFormElement>) => {
-  //   ev.preventDefault();
-
-  //   if (!user) {
-  //     console.error("User is not authenticated.");
-  //     return;
-  //   }
-
-  //   if (!file || file.length === 0) {
-  //     console.error("No file selected");
-  //     return;
-  //   }
-
-  //   const blog = new FormData();
-  //   blog.set("title", title);
-  //   blog.set("summary", summary);
-  //   blog.set("content", content);
-  //   blog.append("file", file[0]); // Safely append file
-  //   blog.set("userId", user?._id || ""); // Use a fallback for user.id
-
-  //   await fetch(`http://localhost:8000/api/v1/users/Post/${id}`, {
-  //     method: "PUT",
-  //     credentials: "include",
-  //     body: blog,
-  //   })
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       console.log(data);
-  //       router.push(`/Post/${id}`);
-  //     });
-  // };
+  const handleFileChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = ev.target.files;
+    setFile(selectedFiles);
+    if (selectedFiles && selectedFiles.length > 0) {
+      toast.success("File uploaded successfully!");
+    }
+  };
 
   return (
     <form
       className="flex flex-col justify-center items-center gap-4 w-full h-screen mt-6"
       onSubmit={updatePost}
     >
-      <img
+      <Image
         className=" w-[70vw] h-[250px] rounded-lg object-cover"
         src="https://images.pexels.com/photos/6685428/pexels-photo-6685428.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500"
         alt=""
+        width={700}
+        height={250}
       />
       <h1 className="text-center my-2 text-2xl font-serif">Update Blog</h1>
       <div className="flex flex-col items-center w-full mb-6 gap-3">
@@ -162,11 +143,7 @@ const Page = () => {
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
         />
-        <input
-          type="file"
-          accept=".png, .jpg, .jpeg"
-          onChange={(ev) => setFile(ev.target.files)}
-        />
+
         <label htmlFor="fileInput" className="cursor-pointer">
           <i className="w-6 h-6 text-lg border border-gray-400 rounded-full flex items-center justify-center text-gray-500 ">
             <FaPlus />
@@ -175,7 +152,7 @@ const Page = () => {
         <input
           id="fileInput"
           type="file"
-          onChange={(ev) => setFile(ev.target.files)}
+          onChange={handleFileChange}
           className="hidden"
         />
       </div>

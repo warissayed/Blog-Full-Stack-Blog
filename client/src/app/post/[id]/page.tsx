@@ -6,13 +6,13 @@ import { format } from "date-fns";
 import setUserStore from "@/app/store/useStore";
 import { useRouter } from "next/navigation";
 import { io, Socket } from "socket.io-client";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 //icons imports
 import { FaEdit } from "react-icons/fa";
 import { FaTrashAlt } from "react-icons/fa";
 import { FaHeart } from "react-icons/fa6";
-import { comment } from "postcss";
-import { data } from "framer-motion/client";
 
 interface BlogInfo {
   data: {
@@ -47,9 +47,10 @@ const page: React.FC = () => {
   const { user } = setUserStore();
   const { id } = useParams();
   const router = useRouter();
+  const API = process.env.NEXT_PUBLIC_BACKEND_API;
 
   useEffect(() => {
-    const newSocket = io("http://localhost:8000", {
+    const newSocket = io(`http://localhost:8000`, {
       reconnection: true,
     });
 
@@ -63,9 +64,7 @@ const page: React.FC = () => {
   useEffect(() => {
     const fetchBlogInfo = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:8000/api/v1/users/Post/${id}`
-        );
+        const response = await fetch(`${API}/users/Post/${id}`);
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -139,85 +138,19 @@ const page: React.FC = () => {
     };
   }, [socket, id]);
 
-  console.log("Updated Likes Array:", blogInfo?.data?.likes);
-
   useEffect(() => {
     console.log("Updated blogInfo:", blogInfo?.data?.likes);
   }, [blogInfo]);
 
-  //Like and unlike Functionality test 1
-  // const toggleLike = async () => {
-  //   try {
-  //     const response = await fetch(
-  //       `http://localhost:8000/api/v1/users/blogs/${id}/like`,
-  //       {
-  //         method: "POST",
-  //         credentials: "include",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${user?._id}`,
-  //         },
-  //       }
-  //     );
-
-  //     if (response.ok) {
-  //       const updatedBlog = await response.json();
-  //       setBlogInfo(
-  //         (prev) =>
-  //           prev && {
-  //             ...prev,
-  //             data: { ...prev.data, likes: updatedBlog.likes },
-  //           }
-  //       );
-  //       console.log("Like updated successfully");
-  //     }
-  //   } catch (error) {
-  //     console.error("Failed to toggle like:", error);
-  //   }
-  // };
-
-  // const toggleLike = async () => {
-  //   try {
-  //     const response = await fetch(
-  //       `http://localhost:8000/api/v1/users/blogs/${id}/like`,
-  //       {
-  //         method: "POST",
-  //         credentials: "include",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${user?._id}`,
-  //         },
-  //       }
-  //     );
-
-  //     if (!response.ok) throw new Error("Failed to update like");
-
-  //     // Update the local state optimistically
-  //     const updatedBlog = await response.json();
-  //     setBlogInfo(
-  //       (prev) =>
-  //         prev && {
-  //           ...prev,
-  //           data: { ...prev.data, likes: updatedBlog.likes },
-  //         }
-  //     );
-  //   } catch (error) {
-  //     console.error("Error updating like:", error);
-  //   }
-  // };
-
   const toggleLike = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:8000/api/v1/users/blogs/${id}/like`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            Authorization: `Bearer ${user?._id}`,
-          },
-        }
-      );
+      const response = await fetch(`${API}/users/blogs/${id}/like`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          Authorization: `Bearer ${user?._id}`,
+        },
+      });
 
       if (!response.ok) throw new Error("Failed to update like");
 
@@ -233,8 +166,10 @@ const page: React.FC = () => {
             }
           : prev
       );
+      toast.success("Like Updated");
     } catch (error) {
       console.error("Error updating like:", error);
+      toast.error("Error updating like");
     }
   };
 
@@ -243,29 +178,28 @@ const page: React.FC = () => {
     if (!comment) return;
 
     try {
-      const response = await fetch(
-        `http://localhost:8000/api/v1/users/blogs/${id}/comment`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user?._id}`, // Ensure correct token usage
-          },
-          body: JSON.stringify({ content: comment }),
-        }
-      );
+      const response = await fetch(`${API}/users/blogs/${id}/comment`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user?._id}`, // Ensure correct token usage
+        },
+        body: JSON.stringify({ content: comment }),
+      });
+      toast.success("Comment added successfully");
       if (response.ok) {
         setComment(""); // Clear the input after submission
       }
     } catch (error) {
       console.error("Failed to submit comment:", error);
+      toast.error("Failed to submit comment:");
     }
   };
 
   function delete_Post() {
     try {
-      fetch(`http://localhost:8000/api/v1/users/deletePost/${id}`, {
+      fetch(`${API}/users/deletePost/${id}`, {
         method: "DELETE",
         credentials: "include",
         headers: {
@@ -283,12 +217,15 @@ const page: React.FC = () => {
           }
           return response.json();
         })
+
         .then((data) => {
           console.log(data);
+          toast.success("Post deleted successfully ");
           router.push("/");
         });
     } catch (error) {
       console.error("Failed to delete blog info:", error);
+      toast.error("Failed to delete blog ");
     }
   }
 

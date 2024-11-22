@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import TopBar from "./components/top";
+import { Bounce, ToastContainer } from "react-toastify";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,8 +21,19 @@ export default function RootLayout({
   return (
     <html lang="en" className="bg-[#F5F5DC]">
       <body className={inter.className}>
-        {/* <Navbar /> */}
         <TopBar />
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+        />
 
         {children}
         <Footer />

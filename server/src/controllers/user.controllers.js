@@ -32,6 +32,25 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields are required");
   }
 
+  if (!username || username.trim().length < 3) {
+    return res
+      .status(400)
+      .json({ message: "Username must be at least 3 characters long" });
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || !emailRegex.test(email)) {
+    return res
+      .status(400)
+      .json({ message: "Please enter a valid email address" });
+  }
+
+  if (!password || password.trim().length < 6) {
+    return res
+      .status(400)
+      .json({ message: "Password must be at least 6 characters long" });
+  }
+
   try {
     const existedUser = await User.findOne({
       $or: [{ username }, { email }],
