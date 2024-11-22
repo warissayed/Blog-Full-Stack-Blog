@@ -43,7 +43,7 @@ export default function TopBar() {
       }
     };
     fetchUser();
-  }, []);
+  }, [setUser]);
 
   function logout() {
     fetch(`${API}/users/logout`, {

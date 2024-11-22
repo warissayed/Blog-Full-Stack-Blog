@@ -39,7 +39,7 @@ interface BlogInfo {
   };
 }
 
-const page: React.FC = () => {
+const Page: React.FC = () => {
   const [blogInfo, setBlogInfo] = useState<BlogInfo>();
   const [comment, setComment] = useState("");
 
@@ -360,4 +360,4 @@ const page: React.FC = () => {
   );
 };
 
-export default page;
+export default Page;
