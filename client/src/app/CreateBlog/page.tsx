@@ -1,13 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import setUserStore from "../store/useStore";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
+
+const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+import "react-quill/dist/quill.snow.css";
 
 const modules = {
   toolbar: [
@@ -31,13 +32,19 @@ const formats = [
   "image",
 ];
 
-const CreateBlog = () => {
+const Page = () => {
   const [title, setTitle] = useState("");
   const [summary, setSummary] = useState("");
   const [content, setContent] = useState("");
-  const { user, setUser } = setUserStore();
-  const [file, setFile] = useState<FileList | null>();
+  const [file, setFile] = useState<FileList | null>(null);
   const router = useRouter();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true); // Ensures this code only runs on the client
+  }, []);
+
+  if (!isClient) return <h1>Loading...</h1>;
 
   const fetchConfig = async (input: string, init?: RequestInit) => {
     const API = process.env.NEXT_PUBLIC_BACKEND_API;
@@ -88,6 +95,7 @@ const CreateBlog = () => {
 
     await CreatePost(post);
   }
+
   const handleFileChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = ev.target.files;
     setFile(selectedFiles);
@@ -95,6 +103,7 @@ const CreateBlog = () => {
       toast.success("File uploaded successfully!");
     }
   };
+
   return (
     <form
       className="flex flex-col justify-center items-center gap-4 w-full h-screen mt-6"
@@ -156,4 +165,4 @@ const CreateBlog = () => {
   );
 };
 
-export default CreateBlog;
+export default Page;

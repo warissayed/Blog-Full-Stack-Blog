@@ -3,7 +3,7 @@ import React from "react";
 import setUserStore from "../store/useStore";
 import { format } from "date-fns";
 
-const page: React.FC = () => {
+const Page: React.FC = () => {
   const { user } = setUserStore();
 
   return (
@@ -32,4 +32,4 @@ const page: React.FC = () => {
   );
 };
 
-export default page;
+export default Page;
