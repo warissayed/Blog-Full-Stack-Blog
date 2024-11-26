@@ -8,7 +8,7 @@ import { Server } from "socket.io";
 const app = express();
 
 const corsOptions = {
-  origin: "https://xzenblog.vercel.app/",
+  origin: "https://xzenblog.vercel.app",
   credentials: true,
 };
 
@@ -19,7 +19,7 @@ app.use(cookieParser());
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "https://xzenblog.vercel.app/",
+    origin: "https://xzenblog.vercel.app",
     methods: ["GET", "POST"],
   },
 });
