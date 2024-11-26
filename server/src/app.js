@@ -8,7 +8,7 @@ import { Server } from "socket.io";
 const app = express();
 
 const corsOptions = {
-  origin: "http://localhost:3000",
+  origin: "https://xzenblog.vercel.app/",
   credentials: true,
 };
 
