@@ -50,7 +50,7 @@ const Page: React.FC = () => {
   const API = process.env.NEXT_PUBLIC_BACKEND_API;
 
   useEffect(() => {
-    const newSocket = io(`http://localhost:8000`, {
+    const newSocket = io(`https://xzenblog-server.onrender.com`, {
       reconnection: true,
     });
 
