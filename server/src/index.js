@@ -4,7 +4,13 @@ import { server } from "./app.js";
 import connectDB from "./db/db.js";
 import dotenv from "dotenv";
 
-dotenv.config();
+dotenv.config(
+  process.env.NODE_ENV === "production"
+    ? {}
+    : {
+        path: "./.env",
+      }
+);
 
 connectDB()
   .then(() => {
