@@ -25,11 +25,9 @@ const io = new Server(server, {
 });
 
 app.use((req, res, next) => {
-  req.io = io; // Attach `io` to the request object
+  req.io = io;
   next();
 });
-
-console.log("Hello from server");
 
 app.use("/api/v1/users", router);
 
@@ -40,7 +38,5 @@ io.on("connection", (socket) => {
     console.log("User disconnected:", socket.id);
   });
 });
-
-console.log("done");
 
 export { app, server, io };

@@ -146,7 +146,7 @@ const Page = () => {
           className="hidden"
         />
       </div>
-      <div className="w-[71%]">
+      <div className="w-[71%] ">
         <ReactQuill
           value={content}
           onChange={(newValue) => setContent(newValue)}

@@ -65,7 +65,7 @@ export default function TestComponent() {
               </Link>
 
               <div className="flex flex-col items-center mt-4">
-                <div className="flex">
+                {/* <div className="flex">
                   <span className="font-varela text-xs font-normal text-[#be9656] leading-[19px] mt-3 mr-3 cursor-pointer">
                     <Link href="/posts?cat=Music">
                       <p className="no-underline">Music</p>
@@ -76,7 +76,7 @@ export default function TestComponent() {
                       <p className="no-underline">Life</p>
                     </Link>
                   </span>
-                </div>
+                </div> */}
                 <span className="font-josefin text-2xl font-bold mt-3 cursor-pointer">
                   <Link href={`/post/${post._id}`}>
                     <p className="no-underline w-[380px] text-center  truncate">
