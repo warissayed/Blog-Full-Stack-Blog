@@ -125,9 +125,19 @@ const loginUser = asyncHandler(async (req, res) => {
     httpOnly: true,
     secure: true,
   };
+
   return res
     .status(200)
-    .cookie("accessToken", accessToken, options)
+    .cookie(
+      "accessToken",
+      accessToken,
+      {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "None",
+      },
+      options
+    )
     .cookie("refreshToken", refreshToken, options)
     .json(
       new ApiResponse(
@@ -177,6 +187,9 @@ const logoutUser = asyncHandler(async (req, res) => {
 const isUserLoggedIn = asyncHandler(async (req, res) => {
   const token =
     req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
+  console.log(token);
+  console.log("Cookies:", req.cookies.accessToken);
+  console.log("Authorization Header:", req.headers.authorization);
 
   if (!token) {
     throw new ApiError(401, "Access token is required for authentication");
