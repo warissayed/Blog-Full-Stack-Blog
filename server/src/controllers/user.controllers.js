@@ -176,6 +176,22 @@ const logoutUser = asyncHandler(async (req, res) => {
   }
 });
 const isUserLoggedIn = asyncHandler(async (req, res) => {
+  console.log("Raw cookies:", req.cookies);
+  console.log("Raw headers:", req.headers);
+  console.log("Cookie header:", req.headers.cookie);
+
+  // Parse cookies manually if req.cookies is undefined
+  let cookies = {};
+  if (req.headers.cookie) {
+    req.headers.cookie.split(';').forEach(cookie => {
+      const parts = cookie.split('=');
+      const name = parts[0].trim();
+      const value = parts[1]?.trim();
+      cookies[name] = value;
+    });
+  }
+  console.log("Parsed cookies:", cookies);
+
   const token =
     req.Cookies.accessToken ||
     req.headers.authorization?.split(" ")[1] ||
