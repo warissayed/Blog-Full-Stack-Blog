@@ -177,9 +177,12 @@ const logoutUser = asyncHandler(async (req, res) => {
 });
 const isUserLoggedIn = asyncHandler(async (req, res) => {
   const token =
-    req.cookies.accessToken || req.headers.authorization?.split(" ")[1];
+    req.Cookies.accessToken ||
+    req.headers.authorization?.split(" ")[1] ||
+    req.cookies.accessToken;
   console.log(token);
   console.log("Cookies:", req.cookies.accessToken);
+  console.log("Headers:", req.Cookies.accessToken);
   console.log("Authorization Header:", req.headers.authorization);
 
   if (!token) {

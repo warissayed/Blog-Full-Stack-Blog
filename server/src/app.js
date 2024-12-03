@@ -31,6 +31,7 @@ app.use((req, res, next) => {
 app.use((req, res, next) => {
   console.log("Headers:", req.headers);
   console.log("Cookies:", req.cookies);
+  console.log("accessToken", req.Cookies);
   next();
 });
 
