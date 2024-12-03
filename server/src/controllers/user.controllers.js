@@ -135,6 +135,7 @@ const loginUser = asyncHandler(async (req, res) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "None",
+        domain: "https://xzenblog.vercel.app",
       },
       options
     )

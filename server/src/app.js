@@ -28,6 +28,11 @@ app.use((req, res, next) => {
   req.io = io;
   next();
 });
+app.use((req, res, next) => {
+  console.log("Headers:", req.headers);
+  console.log("Cookies:", req.cookies);
+  next();
+});
 
 app.use("/api/v1/users", router);
 
