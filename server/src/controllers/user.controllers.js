@@ -180,11 +180,10 @@ const isUserLoggedIn = asyncHandler(async (req, res) => {
   console.log("Raw headers:", req.headers);
   console.log("Cookie header:", req.headers.cookie);
 
-  // Parse cookies manually if req.cookies is undefined
   let cookies = {};
   if (req.headers.cookie) {
-    req.headers.cookie.split(';').forEach(cookie => {
-      const parts = cookie.split('=');
+    req.headers.cookie.split(";").forEach((cookie) => {
+      const parts = cookie.split("=");
       const name = parts[0].trim();
       const value = parts[1]?.trim();
       cookies[name] = value;
@@ -192,20 +191,23 @@ const isUserLoggedIn = asyncHandler(async (req, res) => {
   }
   console.log("Parsed cookies:", cookies);
 
+  // Corrected token extraction
   const token =
-    req.Cookies.accessToken ||
-    req.headers.authorization?.split(" ")[1] ||
-    req.cookies.accessToken;
-  console.log(token);
-  console.log("Cookies:", req.cookies.accessToken);
-  console.log("Headers:", req.Cookies.accessToken);
-  console.log("Authorization Header:", req.headers.authorization);
+    req.cookies?.accessToken || // Fix: Use lowercase 'cookies'
+    req.headers.authorization?.split(" ")[1];
+
+  console.log("Extracted Token:", token);
 
   if (!token) {
-    throw new ApiError(401, "Access token is required for authentication");
+    return res.status(401).json({ message: "Access token is required" });
   }
 
-  const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid access token" });
+  }
 
   try {
     const user = await User.findById(decoded._id).select(
@@ -213,16 +215,17 @@ const isUserLoggedIn = asyncHandler(async (req, res) => {
     );
 
     if (!user) {
-      throw new ApiError(404, "User not found");
+      return res.status(404).json({ message: "User not found" });
     }
 
     return res
       .status(200)
       .json(new ApiResponse(200, user, "User is logged in"));
   } catch (error) {
-    throw new ApiError(401, "Invalid access token");
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 });
+
 const createPost = asyncHandler(async (req, res) => {
   const { title, summary, content } = req.body;
   const token =
