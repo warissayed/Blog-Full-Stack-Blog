@@ -128,7 +128,13 @@ const loginUser = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .cookie("accessToken", accessToken, options)
+    .cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+    })
+
     .cookie("refreshToken", refreshToken, options)
     .json(
       new ApiResponse(
@@ -191,10 +197,8 @@ const isUserLoggedIn = asyncHandler(async (req, res) => {
   }
   console.log("Parsed cookies:", cookies);
 
-  // Corrected token extraction
   const token =
-    req.cookies?.accessToken || // Fix: Use lowercase 'cookies'
-    req.headers.authorization?.split(" ")[1];
+    req.cookies?.accessToken || req.headers.authorization?.split(" ")[1];
 
   console.log("Extracted Token:", token);
 

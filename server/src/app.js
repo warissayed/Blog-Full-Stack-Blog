@@ -9,6 +9,7 @@ const app = express();
 
 const corsOptions = {
   origin: "https://xzenblog.vercel.app",
+
   credentials: true,
 };
 
